@@ -58,6 +58,7 @@
     <Compile Include="LogHelper.cs" />
     <Compile Include="MainTabWindow.cs" />
     <Compile Include="Models\PawnWithWorkgroups.cs" />
+    <Compile Include="Models\UniqueId.cs" />
     <Compile Include="Models\WorkGroup.cs" />
     <Compile Include="WorkGroupsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -106,11 +106,21 @@ namespace The1nk.WorkGroups
             newLoc.x += 200;
 
             txtRec = new Rect(newLoc);
-            txtRec.width = 100;
-            if (Widgets.ButtonText(txtRec, "Edit")) {
+            txtRec.width = 40;
+            if (Widgets.ButtonText(txtRec, "Jobs")) {
                 Find.WindowStack.Add(new FloatMenu(GetWorkTypesList(group)));
             }
-            newLoc.x += 120;
+            if (Mouse.IsOver(txtRec))
+                TooltipHandler.TipRegion(txtRec, (Func<string>)(() => "What Jobs this WorkGroup contains. All Jobs in a given WorkGroup will have the same Work Priority."), UniqueId.Next());
+            newLoc.x += 60;
+            txtRec = new Rect(newLoc);
+            txtRec.width = 40;
+            if (Widgets.ButtonText(txtRec, "And..")) {
+                Find.WindowStack.Add(new FloatMenu(GetWorkGroupsList(group)));
+            }
+            newLoc.x += 60;
+            if (Mouse.IsOver(txtRec))
+                TooltipHandler.TipRegion(txtRec, (Func<string>)(() => "What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers."), UniqueId.Next());
 
             string qtyBuffer = @group.TargetQuantity.ToString("0");
             txtRec = new Rect(newLoc);
@@ -213,6 +223,21 @@ namespace The1nk.WorkGroups
             ret.AddRange(WorkGroupsSettings.GetSettings.AllWorkTypes
                 .Where(wt => wt.visible && !group.Items.Contains(wt)).OrderByDescending(wt => wt.naturalPriority)
                 .Select(wt => new FloatMenuOption($"DISABLED | {wt.labelShort}", () => group.Items.Add(wt))));
+
+            return ret;
+        }
+
+        private List<FloatMenuOption> GetWorkGroupsList(WorkGroup group) {
+            var ret = new List<FloatMenuOption>();
+            
+            // Enabled ones
+            ret.AddRange(group.CanBeAssignedWith.OrderBy(g => g).Select(g =>
+                new FloatMenuOption($"ENABLED | {g}", () => group.CanBeAssignedWith.Remove(g))));
+
+            // Disabled ones
+            ret.AddRange(WorkGroupsSettings.GetSettings.WorkGroups.Select(g => g.Name).Where(g => !group.CanBeAssignedWith.Contains(g))
+                .OrderBy(g => g).Select(g =>
+                    new FloatMenuOption($"DISABLED | {g}", () => group.CanBeAssignedWith.Add(g))));
 
             return ret;
         }
