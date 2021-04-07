@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  
+  <MainButtonDef>
+    <defName>WorkGroups</defName>
+    <label>WorkGroups</label>
+    <description>Create WorkGroups for automating labor</description>
+    <tabWindowClass>The1nk.WorkGroups.MainTabWindow</tabWindowClass>
+	<validWithoutMap>true</validWithoutMap>
+	<minimized>True</minimized>
+	<iconPath>WorkGroups/WGSymbol</iconPath>	
+    <order>99</order>
+  </MainButtonDef>
+
+</Defs>

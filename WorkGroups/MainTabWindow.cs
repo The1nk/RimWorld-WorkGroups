@@ -12,7 +12,7 @@ namespace The1nk.WorkGroups
     public class MainTabWindow : RimWorld.MainTabWindow {
         private int verticalPadding = 10;
         private int horizontalPadding = 10;
-        private float textHeight = 0;
+        private float textHeight = Verse.Text.LineHeight;
         private Vector2 scrollPosition;
 
         private static readonly Texture2D ReorderUp = ContentFinder<Texture2D>.Get("UI/Buttons/ReorderUp");
@@ -20,7 +20,6 @@ namespace The1nk.WorkGroups
 
         public override void DoWindowContents(UnityEngine.Rect inRect) {
             base.DoWindowContents(inRect);
-            textHeight = Text.CalcSize("The quick brown fox jumps over the lazy dog").y + (verticalPadding / 2f);
             string buffer = WorkGroupsSettings.GetSettings.HoursUpdateInterval.ToString("0");
             string buffer2 = WorkGroupsSettings.GetSettings.MaxPriority.ToString("0");
 
@@ -90,6 +89,7 @@ namespace The1nk.WorkGroups
 
             var groupRect = inRect.AtZero();
             groupRect.height = textHeight;
+
             for (int i = 0; i < WorkGroupsSettings.GetSettings.WorkGroups.Count; i++) {
                 DrawGroup(WorkGroupsSettings.GetSettings.WorkGroups[i], groupRect);
                 groupRect.y += textHeight + verticalPadding;
@@ -110,17 +110,19 @@ namespace The1nk.WorkGroups
             if (Widgets.ButtonText(txtRec, "Jobs")) {
                 Find.WindowStack.Add(new FloatMenu(GetWorkTypesList(group)));
             }
-            if (Mouse.IsOver(txtRec))
-                TooltipHandler.TipRegion(txtRec, (Func<string>)(() => "What Jobs this WorkGroup contains. All Jobs in a given WorkGroup will have the same Work Priority."), UniqueId.Next());
+
+            TooltipHandler.TipRegion(txtRec,
+                "What Jobs this WorkGroup contains. All Jobs in a given WorkGroup will have the same Work Priority.");
             newLoc.x += 60;
+
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
             if (Widgets.ButtonText(txtRec, "And..")) {
                 Find.WindowStack.Add(new FloatMenu(GetWorkGroupsList(group)));
             }
+            TooltipHandler.TipRegion(txtRec,
+                "What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers.");
             newLoc.x += 60;
-            if (Mouse.IsOver(txtRec))
-                TooltipHandler.TipRegion(txtRec, (Func<string>)(() => "What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers."), UniqueId.Next());
 
             string qtyBuffer = @group.TargetQuantity.ToString("0");
             txtRec = new Rect(newLoc);
@@ -128,23 +130,23 @@ namespace The1nk.WorkGroups
             Widgets.TextFieldNumeric(txtRec, ref @group.TargetQuantity, ref qtyBuffer, 0, 999);
             newLoc.x += 100;
 
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.DisableTitleForThisWorkGroup);
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.DisableTitleForThisWorkGroup, newLoc.height, !WorkGroupsSettings.GetSettings.SetPawnTitles);
             newLoc.x += 70;
             
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.AssignToEveryone);
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.AssignToEveryone, newLoc.height);
             newLoc.x += 70;
             
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.ColonistsAllowed);
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.ColonistsAllowed, newLoc.height);
             newLoc.x += 70;
             
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.SlavesAllowed);
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.SlavesAllowed, newLoc.height, !WorkGroupsSettings.GetSettings.SsInstalled);
             newLoc.x += 50;
             
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.PrisonersAllowed);
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.PrisonersAllowed, newLoc.height, !WorkGroupsSettings.GetSettings.PlInstalled);
             newLoc.x += 70;
             
             if (WorkGroupsSettings.GetSettings.RjwInstalled) {
-                Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed);
+                Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed, newLoc.height);
                 newLoc.x += 70;
             }
 
@@ -235,9 +237,10 @@ namespace The1nk.WorkGroups
                 new FloatMenuOption($"ENABLED | {g}", () => group.CanBeAssignedWith.Remove(g))));
 
             // Disabled ones
-            ret.AddRange(WorkGroupsSettings.GetSettings.WorkGroups.Select(g => g.Name).Where(g => !group.CanBeAssignedWith.Contains(g))
-                .OrderBy(g => g).Select(g =>
-                    new FloatMenuOption($"DISABLED | {g}", () => group.CanBeAssignedWith.Add(g))));
+            ret.AddRange(WorkGroupsSettings.GetSettings.WorkGroups.Select(g => g.Name)
+                .Where(g => !group.CanBeAssignedWith.Contains(g) && group.Name != g)
+                .OrderBy(g => g)
+                .Select(g => new FloatMenuOption($"DISABLED | {g}", () => group.CanBeAssignedWith.Add(g))));
 
             return ret;
         }

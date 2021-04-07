@@ -65,10 +65,24 @@
     <Compile Include="WorkGroupsMapComponent.cs" />
     <Compile Include="WorkGroupsSettings.cs" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="RestOfModGoesHere\1.2\Defs\MainTabDefs\MainTabs.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RestOfModGoesHere\About\About.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RestOfModGoesHere\Textures\WorkGroups\WGSymbol.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\WorkGroups\1.2\Assemblies"
-
-</PostBuildEvent>
+    <PostBuildEvent>mkdir $(TargetDir)RestOfModGoesHere\1.2\Assemblies
+copy $(TargetPath) $(TargetDir)RestOfModGoesHere\1.2\Assemblies
+rmdir /S /Q "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\WorkGroups"
+mkdir "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\WorkGroups"
+xcopy $(TargetDir)RestOfModGoesHere\*.* "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\WorkGroups" /E</PostBuildEvent>
   </PropertyGroup>
 </Project>

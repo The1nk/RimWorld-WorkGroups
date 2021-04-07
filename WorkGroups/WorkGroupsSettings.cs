@@ -10,20 +10,22 @@ namespace The1nk.WorkGroups
 {
     public class WorkGroupsSettings : IExposable {
         public static WorkGroupsSettings GetSettings { get; private set; }
+        public bool SsInstalled  { get; set; }
+        public bool PlInstalled { get; set; }
 
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
 
-        public bool Enabled = true;
+        public bool Enabled = false;
         public bool SetPrioritiesForSlaves = true; // Simple Slavery
         public bool SetPrioritiesForPrisoners = true; // Prison Labor
         public bool RjwInstalled = false; // So that we can hide settings
         public bool SetPrioritiesForRjwWorkers = true; // RJW
         public bool SetPawnTitles = true; 
         public int MaxPriority = 4;
-        public int HoursUpdateInterval = 25;
+        public int HoursUpdateInterval = 2;
         public bool ClearOutSchedules = true;
         public List<WorkGroup> WorkGroups;
-        public bool VerboseLogging;
+        public bool VerboseLogging = false;
 
         public WorkGroupsSettings() {
             WorkGroups = new List<WorkGroup>();

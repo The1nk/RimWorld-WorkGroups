@@ -19,7 +19,7 @@ namespace The1nk.WorkGroups {
         private long lastUpdateTick = 0;
         private long nextUpdateTick = 0;
         private bool prepped = false;
-
+        
 
         public WorkGroupsMapComponent(Map map) : base(map) {
             var crp = new WorkGroupsSettings();
@@ -70,22 +70,20 @@ namespace The1nk.WorkGroups {
                 _settings.WorkGroups = new List<WorkGroup>();
 
             SlaveHediff = DefDatabase<HediffDef>.GetNamedSilentFail("Enslaved");
-            if (SlaveHediff == null)
-                _settings.SetPrioritiesForSlaves = false;
+            _settings.SsInstalled = SlaveHediff != null;
             
             var rjwType = GenTypes.GetTypeInAnyAssembly("rjw.xxx", "rjw");
             LogHelper.Verbose("RJW Type found? " + (rjwType != null));
             if (rjwType != null)
                 RjwMethod = rjwType.GetMethod("is_whore");
-            else
-                _settings.SetPrioritiesForRjwWorkers = false;
+
+            _settings.RjwInstalled = RjwMethod != null;
 
             var plType = GenTypes.GetTypeInAnyAssembly("PrisonLabor.Core.PrisonLaborUtility", "PrisonLabor.Core");
             LogHelper.Verbose("Prison Labor Type found? " + (plType != null));
             if (plType != null)
                 PlMethod = plType.GetMethod("LaborEnabled");
-            else
-                _settings.SetPrioritiesForPrisoners = false;
+            _settings.PlInstalled = PlMethod != null;
 
             _settings.AllWorkTypes = FetchWorkTypes(ref _settings.AllWorkTypes);
 
@@ -96,9 +94,6 @@ namespace The1nk.WorkGroups {
                     pawn.workSettings?.Notify_UseWorkPrioritiesChanged();
                 }
             }
-
-            if (rjwType != null)
-                _settings.RjwInstalled = true;
 
             prepped = true;
             LogHelper.Verbose("-Prep()");
