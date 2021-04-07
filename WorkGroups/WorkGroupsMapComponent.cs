@@ -51,7 +51,8 @@ namespace The1nk.WorkGroups {
             LogHelper.Info($"Fired at {lastUpdateTick}. Next at {nextUpdateTick}.");
 
             var pawns = FetchColonists();
-            (pawns as List<PawnWithWorkgroups>).AddRange(FetchPrisoners());
+            if (_settings.SetPrioritiesForPrisoners)
+                (pawns as List<PawnWithWorkgroups>).AddRange(FetchPrisoners());
             ClearWorkGroups(ref pawns);
             var madeChanges = false;
             while (UpdatePriorities(ref pawns))
@@ -69,16 +70,22 @@ namespace The1nk.WorkGroups {
                 _settings.WorkGroups = new List<WorkGroup>();
 
             SlaveHediff = DefDatabase<HediffDef>.GetNamedSilentFail("Enslaved");
+            if (SlaveHediff == null)
+                _settings.SetPrioritiesForSlaves = false;
             
             var rjwType = GenTypes.GetTypeInAnyAssembly("rjw.xxx", "rjw");
             LogHelper.Verbose("RJW Type found? " + (rjwType != null));
             if (rjwType != null)
                 RjwMethod = rjwType.GetMethod("is_whore");
+            else
+                _settings.SetPrioritiesForRjwWorkers = false;
 
             var plType = GenTypes.GetTypeInAnyAssembly("PrisonLabor.Core.PrisonLaborUtility", "PrisonLabor.Core");
             LogHelper.Verbose("Prison Labor Type found? " + (plType != null));
             if (plType != null)
                 PlMethod = plType.GetMethod("LaborEnabled");
+            else
+                _settings.SetPrioritiesForPrisoners = false;
 
             _settings.AllWorkTypes = FetchWorkTypes(ref _settings.AllWorkTypes);
 
