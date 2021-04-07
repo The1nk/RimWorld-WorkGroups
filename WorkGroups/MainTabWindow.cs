@@ -32,18 +32,18 @@ namespace The1nk.WorkGroups
             Widgets.CheckboxLabeled(cbLocation, "Enabled", ref WorkGroupsSettings.GetSettings.Enabled);
 
             cbLocation.y += textHeight + verticalPadding;
-            Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Slaves? (Simple Slavery support)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForSlaves);
+            Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Slaves? (Requires Simple Slavery)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForSlaves, !WorkGroupsSettings.GetSettings.SsInstalled);
 
             cbLocation.y += textHeight + verticalPadding;
-            Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Prisoners? (Prison Labor support)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForPrisoners);
+            Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Prisoners? (Requires Prison Labor)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForPrisoners, !WorkGroupsSettings.GetSettings.PlInstalled);
 
             if (WorkGroupsSettings.GetSettings.RjwInstalled) {
                 cbLocation.y += textHeight + verticalPadding;
-                Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Whores? (RimJobWorld support)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForRjwWorkers);
+                Widgets.CheckboxLabeled(cbLocation, "Set Priorities for Whores? (Requires RimJobWorld)", ref WorkGroupsSettings.GetSettings.SetPrioritiesForRjwWorkers, !WorkGroupsSettings.GetSettings.RjwInstalled);
             }
 
             cbLocation.y += textHeight + verticalPadding;
-            Widgets.CheckboxLabeled(cbLocation, "Set Pawn Titles? (Show titles under names with Guards For Me)", ref WorkGroupsSettings.GetSettings.SetPawnTitles);
+            Widgets.CheckboxLabeled(cbLocation, "Set Pawn Titles? (Useful with 'Show Titles' feature of Guards For Me)", ref WorkGroupsSettings.GetSettings.SetPawnTitles);
 
             cbLocation.y += textHeight + verticalPadding;
             Widgets.CheckboxLabeled(cbLocation, "Clear Schedules?", ref WorkGroupsSettings.GetSettings.ClearOutSchedules);
@@ -146,7 +146,7 @@ namespace The1nk.WorkGroups
             newLoc.x += 70;
             
             if (WorkGroupsSettings.GetSettings.RjwInstalled) {
-                Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed, newLoc.height);
+                Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed, newLoc.height, !WorkGroupsSettings.GetSettings.RjwInstalled);
                 newLoc.x += 70;
             }
 
