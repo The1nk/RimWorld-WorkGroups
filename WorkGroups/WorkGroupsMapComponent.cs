@@ -211,8 +211,7 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} slaves due to WorkGroup setting disabled");
                     }
 
-                    if (!_settings.RjwInstalled ||
-                        (_settings.RjwInstalled && !wg.RjwWorkersAllowed)) {
+                    if (_settings.RjwInstalled && !wg.RjwWorkersAllowed) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !p.IsRjwWorker);
                         var after = filteredPawns.Count();
@@ -286,7 +285,7 @@ namespace The1nk.WorkGroups {
 
             ret.AddRange(map.mapPawns.FreeColonistsSpawned.Select(p => new PawnWithWorkgroups(p)));
 
-            if (SlaveHediff != null && !_settings.SetPrioritiesForSlaves) {
+            if (_settings.SsInstalled && !_settings.SetPrioritiesForSlaves) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsSlave);
                 var after = ret.Count();
@@ -295,7 +294,7 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"Filtered out {before - after} slaves due to global setting disabled");
             }
 
-            if (RjwMethod != null && !_settings.SetPrioritiesForRjwWorkers) {
+            if (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsRjwWorker);
                 var after = ret.Count();
@@ -314,8 +313,7 @@ namespace The1nk.WorkGroups {
 
             ret.AddRange(map.mapPawns.PrisonersOfColonySpawned.Select(p => new PawnWithWorkgroups(p)));
 
-            if (!_settings.RjwInstalled || 
-                (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers)) {
+            if (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsRjwWorker);
                 var after = ret.Count();
@@ -324,14 +322,14 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"Filtered out {before - after} (Prisoner) RJW Workers due to global setting disabled");
             }
 
-            if (!_settings.SetPrioritiesForPrisoners) {
+            if (!_settings.PlInstalled) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsPrisoner);
                 var after = ret.Count();
 
                 if (before != after)
-                    LogHelper.Verbose($"Filtered out {before - after} Prisoners due to global setting disabled");
-            }else {
+                    LogHelper.Verbose($"Filtered out {before - after} Prisoners due to no Prison Labor");
+            } else {
                 var removed = ret.RemoveAll(p => !p.IsWorkingPrisoner);
                 if (removed > 0)
                     LogHelper.Verbose($"Filtered out {removed} Prisoners due to not being set to Work");

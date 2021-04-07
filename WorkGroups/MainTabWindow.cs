@@ -202,13 +202,13 @@ namespace The1nk.WorkGroups
         }
 
         public override void PostClose() {
-            WorkGroupsSettings.GetSettings.Component.RunNow();
+            WorkGroupsSettings.GetSettings.Component?.RunNow();
 
             base.PostClose();
         }
 
         public override void PreOpen() {
-            WorkGroupsSettings.GetSettings.Component.RunNow();
+            WorkGroupsSettings.GetSettings.Component?.RunNow();
 
             base.PreOpen();
         }
