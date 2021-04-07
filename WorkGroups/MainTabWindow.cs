@@ -202,16 +202,15 @@ namespace The1nk.WorkGroups
         }
 
         public override void PostClose() {
-
+            WorkGroupsSettings.GetSettings.Component.RunNow();
 
             base.PostClose();
         }
 
         public override void PreOpen() {
+            WorkGroupsSettings.GetSettings.Component.RunNow();
+
             base.PreOpen();
-
-
-
         }
 
         private List<FloatMenuOption> GetWorkTypesList(WorkGroup group) {

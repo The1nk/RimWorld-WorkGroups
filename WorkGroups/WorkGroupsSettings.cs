@@ -10,15 +10,48 @@ namespace The1nk.WorkGroups
 {
     public class WorkGroupsSettings : IExposable {
         public static WorkGroupsSettings GetSettings { get; private set; }
-        public bool SsInstalled  { get; set; }
-        public bool PlInstalled { get; set; }
+
+        private bool _ssInstalled;
+        private bool _plInstalled;
+        private bool _rjwInstalled;
+
+        public bool SsInstalled {
+            get => _ssInstalled;
+            set {
+                if (value == false)
+                    SetPrioritiesForSlaves = false;
+
+                _ssInstalled = value;
+            }
+        }
+
+        public bool PlInstalled {
+            get => _plInstalled;
+            set {
+                if (value == false)
+                    SetPrioritiesForPrisoners = false;
+
+                _plInstalled = value;
+            }
+        }
+
+        public bool RjwInstalled {
+            get => _rjwInstalled;
+            set {
+                if (value == false)
+                    SetPrioritiesForRjwWorkers = false;
+
+                _rjwInstalled = value;
+            }
+        }
+
+        public WorkGroupsMapComponent Component { get; set; }
 
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
 
         public bool Enabled = false;
         public bool SetPrioritiesForSlaves = true; // Simple Slavery
         public bool SetPrioritiesForPrisoners = true; // Prison Labor
-        public bool RjwInstalled = false; // So that we can hide settings
         public bool SetPrioritiesForRjwWorkers = true; // RJW
         public bool SetPawnTitles = true; 
         public int MaxPriority = 4;
