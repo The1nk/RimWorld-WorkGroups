@@ -73,6 +73,9 @@
     <Content Include="RestOfModGoesHere\About\About.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="RestOfModGoesHere\About\PublishedFileId.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RestOfModGoesHere\Textures\WorkGroups\WGSymbol.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
