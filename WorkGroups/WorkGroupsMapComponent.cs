@@ -103,6 +103,24 @@ namespace The1nk.WorkGroups {
                 }
             }
 
+            foreach (var wg in _settings.WorkGroups) {
+                for (int i = 0; i < wg.Items.Count; i++) {
+                    var wt = wg.Items[i]; 
+                    if (wt == null) {
+                        LogHelper.Warning($"Found null work type on group '{wg.Name}', position {i + 1}. Removing..");
+                        wg.Items.RemoveAt(i);
+                        i--;
+                    }
+                    else {
+                        if (!_settings.AllWorkTypes.Any(wtD => wtD == wt)) {
+                            LogHelper.Warning($"Work type on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
+                            wg.Items.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
+            }
+
             prepped = true;
             LogHelper.Verbose("-Prep()");
         }

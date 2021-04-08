@@ -18,5 +18,9 @@ namespace The1nk.WorkGroups
             if (WorkGroupsSettings.GetSettings.VerboseLogging)
                 Log.Message($"{Prefix} V {message}", true);
         }
+
+        public static void Warning(string message) {
+            Log.Warning($"{Prefix} W {message}");
+        }
     }
 }
