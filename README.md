@@ -5,7 +5,7 @@ I wanted this mod so I could focus on more "adding skilled pawns" and less "shuf
 
 ## Features
  * Create and prioritize WorkGroups (groupings of Work categories with a Name) that are assigned together to pawns with the highest skills.
- * Designate which WorkGroups are allowed to be set on the same Pawn to prevent your Researcher also being designated as your Planter (WorkGroups that are selected for a pawn come with a `+1` priority, so in this case this pawn would be a [i]backup[/i] planter, for if he had no research tasks lined up.)
+ * Designate which WorkGroups are allowed to be set on the same Pawn to prevent your Researcher also being designated as your Planter (WorkGroups that are selected for a pawn come with a `+1` priority, so in this case this pawn would be a *backup* planter, for if he had no research tasks lined up.)
  * (Optionally) Set Title for pawns who are designated to match their selected WorkGroups (works great with Guards For Me to see at a glance what each pawn's roles are)
  * (Optionally) Automatically clear any new pawns schedules to 24 hours of `Anything`.
  * (Optionally) Set a WorkGroup to be applied to every pawn (I use this for my `Self-Preservation` group as highest-priority, and also for my `Basics` group at lowest priority)
