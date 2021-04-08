@@ -16,6 +16,6 @@ I wanted this mod so I could focus on more "adding skilled pawns" and less "shuf
 ## Notes
  * Save friendly! If adding to an existing save, note that it starts out disabled. You'll need to enable it via the new WorkGroups button on the tab bar at the bottom of your screen.
  * Supports modded work types. These get discovered at runtime, so if it's on that tab, it'll be in here.
- * Prior to removing any mod that contains work type definitions from your game, please insure you have no WorkGroups configured that use that WorkType.. Otherwise you may have to edit your save file to fix it.
+ * If removing a mod that adds work types, the next load will log some Warnings as it cleans up references to those work types from your WorkGroups. These are harmless, and will only appear once.
 
-Contribute at https://github.com/The1nk/RimWorld-WorkGroups
+On the Steam Workshop at https://steamcommunity.com/sharedfiles/filedetails/?id=2449880817
