@@ -161,8 +161,15 @@ namespace The1nk.WorkGroups {
                         if (seenTypes.Contains(wgi))
                             continue; // Only set each WorkType priority *once*. First-come-first-serve!!
 
-                        if (!disabled.Contains(wgi))
+                        if (!disabled.Contains(wgi)) {
+                            var priorityBefore = pawn.Pawn.workSettings.GetPriority(wgi);
                             pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
+                            var priorityAfter = pawn.Pawn.workSettings.GetPriority(wgi);
+
+                            if (priorityAfter != currentPriority)
+                                Log.Warning(
+                                    $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {priorityAfter}!");
+                        }
                         seenTypes.Add(wgi);
                     }
 
