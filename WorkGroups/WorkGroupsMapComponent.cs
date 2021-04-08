@@ -140,7 +140,15 @@ namespace The1nk.WorkGroups {
         private void ApplyPriorities(ref IEnumerable<PawnWithWorkgroups> pawns, bool setPawnTitles) {
             LogHelper.Verbose("+ApplyPriorities()");
             foreach (var pawn in pawns) {
-                if (!pawn.Pawn.workSettings.EverWork) continue;
+                if (pawn.Pawn.workSettings == null) {
+                    LogHelper.Verbose($"--{pawn.Pawn.Name.ToStringShort} has null workSettings .. oops");
+                    continue;
+                }
+
+                if (!pawn.Pawn.workSettings.EverWork) {
+                    LogHelper.Verbose($"--{pawn.Pawn.Name.ToStringShort} has false EverWork");
+                    continue;
+                }
 
                 var newTitle = new List<string>();
                 var disabled = pawn.Pawn.GetDisabledWorkTypes();
