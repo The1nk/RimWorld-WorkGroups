@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using RimWorld;
 using The1nk.WorkGroups.Models;
 using Verse;
@@ -146,8 +145,10 @@ namespace The1nk.WorkGroups {
                 var newTitle = new List<string>();
                 var disabled = pawn.Pawn.GetDisabledWorkTypes();
 
+                // Clear out no-longer-assigned works
                 foreach (var wt in _settings.AllWorkTypes) {
-                    pawn.Pawn.workSettings.SetPriority(wt, 0);
+                    if (!pawn.WorkGroups.Any(g => g.Items.Contains(wt)))
+                        pawn.Pawn.workSettings.SetPriority(wt, 0);
                 }
 
                 var seenTypes = new System.Collections.Generic.List<WorkTypeDef>();
@@ -162,8 +163,8 @@ namespace The1nk.WorkGroups {
                             continue; // Only set each WorkType priority *once*. First-come-first-serve!!
 
                         if (!disabled.Contains(wgi)) {
-                            var priorityBefore = pawn.Pawn.workSettings.GetPriority(wgi);
                             pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
+                            pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
                             var priorityAfter = pawn.Pawn.workSettings.GetPriority(wgi);
 
                             if (priorityAfter != currentPriority)
@@ -190,13 +191,10 @@ namespace The1nk.WorkGroups {
         private void ClearWorkGroups(ref IEnumerable<PawnWithWorkgroups> pawns) {
             LogHelper.Verbose("+ClearWorkGroups()");
             foreach (var pawn in pawns) {
-                if (!(pawn.WorkGroups is IList<WorkGroup> wgList)) {
-                    wgList = new List<WorkGroup>();
-                    pawn.WorkGroups = wgList;
+                pawn.WorkGroups = new List<WorkGroup>();
+                
+                if (_settings.SetPawnTitles)
                     pawn.Pawn.story.Title = string.Empty;
-                }
-
-                wgList.Clear();
             }
             LogHelper.Verbose("-ClearWorkGroups()");
         }
@@ -211,7 +209,9 @@ namespace The1nk.WorkGroups {
 
                 if (wg.AssignToEveryone)
                 {
+                    LogHelper.Verbose($"- {wg.Name} - for everyone..");
                     foreach (var pawn in pawns.Where(p => !p.WorkGroups.Contains(wg))) {
+                        LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Yep");
                         (pawn.WorkGroups as List<WorkGroup>).Add(wg);
                         changedSomething = true;
                     }
@@ -222,7 +222,7 @@ namespace The1nk.WorkGroups {
                 for (int i = 0; i < wg.TargetQuantity; i++) {
                     PawnWithWorkgroups bestPawn = null;
                     float averageSkill = -1f;
-                    LogHelper.Verbose($"Looking for a {wg.Name}..");
+                    LogHelper.Verbose($"- Looking for a {wg.Name}..");
 
                     var filteredPawns = pawns.Where(p => !p.WorkGroups.Contains(wg));
                     if (!_settings.SsInstalled ||
@@ -261,18 +261,16 @@ namespace The1nk.WorkGroups {
                         if (pawn.Pawn.Downed || pawn.Pawn.Dead || pawn.Pawn.InMentalState)
                             continue;
 
-                        LogHelper.Verbose($"Considering {pawn.Pawn.Name.ToStringFull}");
-
                         var disabled = pawn.Pawn.GetDisabledWorkTypes();
                         if (wg.Items.All(w => disabled.Contains(w))) {
-                            LogHelper.Verbose($"Nope - All WorkTypes disabled for this dude");
+                            LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Nope - All WorkTypes disabled for this dude");
                             continue;
                         }
 
                         if (pawn.WorkGroups.Any()) {
                             if (pawn.WorkGroups.Any(wg3 =>
                                 !wg3.AssignToEveryone && !wg3.CanBeAssignedWith.Contains(wg.Name))) {
-                                LogHelper.Verbose($"Nope - WorkGroups already assigned that don't mesh with this");
+                                LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Nope - WorkGroups already assigned that don't mesh with this");
                                 continue;
                             }
                         }
@@ -293,7 +291,7 @@ namespace The1nk.WorkGroups {
                     }
 
                     if (bestPawn != null) {
-                        LogHelper.Verbose($"Selected {bestPawn.Pawn.Name.ToStringFull}");
+                        LogHelper.Verbose($"-- {bestPawn.Pawn.Name.ToStringFull} - Yep");
                         (bestPawn.WorkGroups as List<WorkGroup>).Add(wg);
                         changedSomething = true;
                     }

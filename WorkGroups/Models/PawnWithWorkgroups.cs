@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
+﻿using System.Collections.Generic;
 using Verse;
 
 namespace The1nk.WorkGroups.Models
@@ -18,6 +12,7 @@ namespace The1nk.WorkGroups.Models
             this.Pawn = pawn;
             this.WorkGroups = new List<WorkGroup>();
         }
+
 
         public bool IsSlave =>
             this.Pawn.health.hediffSet.HasHediff(The1nk.WorkGroups.WorkGroupsMapComponent.SlaveHediff);
