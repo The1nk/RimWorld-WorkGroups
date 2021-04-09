@@ -7,6 +7,7 @@ using Verse;
 
 namespace The1nk.WorkGroups
 {
+    [StaticConstructorOnStartup]
     public class MainTabWindow : RimWorld.MainTabWindow {
         private int verticalPadding = 10;
         private int horizontalPadding = 10;
@@ -79,6 +80,19 @@ namespace The1nk.WorkGroups
                     new FloatMenuOption($"Delete {w.Name}",
                         () => { WorkGroups.WorkGroupsSettings.GetSettings.WorkGroups.Remove(w); })).ToList()));
             }
+            cbLocation.y += textHeight + verticalPadding;
+
+            var btnSave = new Rect(cbLocation);
+            btnSave.width = 120;
+
+            var btnLoad = new Rect(btnSave);
+            btnLoad.x += btnSave.width + horizontalPadding;
+
+            if (Widgets.ButtonText(btnSave, "Save"))
+                Find.WindowStack.Add(new FloatMenu(GetSavePresetList()));
+
+            if (Widgets.ButtonText(btnLoad, "Load"))
+                Find.WindowStack.Add(new FloatMenu(GetLoadPresetList()));
             cbLocation.y += textHeight + verticalPadding;
 
             DrawHeader(cbLocation);
@@ -222,6 +236,8 @@ namespace The1nk.WorkGroups
             ret.AddRange(group.Items.OrderByDescending(wt => wt.naturalPriority).Select(wt =>
                 new FloatMenuOption($"ENABLED | {wt.labelShort}", () => group.Items.Remove(wt))));
 
+            ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+
             // Disabled ones
             ret.AddRange(WorkGroupsSettings.GetSettings.AllWorkTypes
                 .Where(wt => wt.visible && !group.Items.Contains(wt)).OrderByDescending(wt => wt.naturalPriority)
@@ -237,11 +253,38 @@ namespace The1nk.WorkGroups
             ret.AddRange(group.CanBeAssignedWith.OrderBy(g => g).Select(g =>
                 new FloatMenuOption($"ENABLED | {g}", () => group.CanBeAssignedWith.Remove(g))));
 
+            ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+
             // Disabled ones
             ret.AddRange(WorkGroupsSettings.GetSettings.WorkGroups.Select(g => g.Name)
                 .Where(g => !group.CanBeAssignedWith.Contains(g) && group.Name != g)
                 .OrderBy(g => g)
                 .Select(g => new FloatMenuOption($"DISABLED | {g}", () => group.CanBeAssignedWith.Add(g))));
+
+            return ret;
+        }
+
+        private List<FloatMenuOption> GetLoadPresetList() {
+            var ret = new List<FloatMenuOption>();
+
+            var saves = WorkGroupsSettings.GetSettings.GetAllPresetSaves();
+
+            foreach (var save in saves) {
+                ret.Add(new FloatMenuOption(save, () => WorkGroupsSettings.GetSettings.LoadFromPreset(save)));
+            }
+
+            return ret;
+        }
+
+        private List<FloatMenuOption> GetSavePresetList() {
+            var ret = GetLoadPresetList();
+
+            ret.ForEach(r => r.action = () => WorkGroupsSettings.GetSettings.SaveToPreset(r.Label));
+
+            ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+            
+            // Todo: add a "new" option
+            ret.Add(new FloatMenuOption("New", () => WorkGroupsSettings.GetSettings.SaveToPreset("Newww")));
 
             return ret;
         }
