@@ -131,7 +131,7 @@ namespace The1nk.WorkGroups {
                 awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
                     .OrderByDescending(d => d.naturalPriority));
 
-                awtList.ForEach(w => LogHelper.Verbose($"--{w.labelShort}"));
+                awtList.ForEach(w => LogHelper.Verbose($"--{w.labelShort}, defName = '{w.defName}'"));
             }
 
             return allWorkTypes;
@@ -151,39 +151,48 @@ namespace The1nk.WorkGroups {
                 }
 
                 var newTitle = new List<string>();
-                var disabled = pawn.Pawn.GetDisabledWorkTypes();
 
-                // Clear out no-longer-assigned works
-                foreach (var wt in _settings.AllWorkTypes) {
-                    if (!pawn.WorkGroups.Any(g => g.Items.Contains(wt)))
-                        pawn.Pawn.workSettings.SetPriority(wt, 0);
+                if (_settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
+                    foreach (var awt in _settings.AllWorkTypes) {
+                        pawn.Pawn.workSettings.SetPriority(awt,
+                            (awt.defName == "PatientBedRest" || awt.defName == "Patient") ? 1 : 0);
+                    }
                 }
+                else {
+                    var disabled = pawn.Pawn.GetDisabledWorkTypes();
 
-                var seenTypes = new System.Collections.Generic.List<WorkTypeDef>();
-
-                int currentPriority = 0;
-                foreach (var wg in pawn.WorkGroups) {
-                    currentPriority++;
-
-                    currentPriority = Math.Min(currentPriority, _settings.MaxPriority);
-                    foreach (var wgi in wg.Items) {
-                        if (seenTypes.Contains(wgi))
-                            continue; // Only set each WorkType priority *once*. First-come-first-serve!!
-
-                        if (!disabled.Contains(wgi)) {
-                            pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
-                            pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
-                            var priorityAfter = pawn.Pawn.workSettings.GetPriority(wgi);
-
-                            if (priorityAfter != currentPriority)
-                                Log.Warning(
-                                    $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {priorityAfter}!");
-                        }
-                        seenTypes.Add(wgi);
+                    // Clear out no-longer-assigned works
+                    foreach (var wt in _settings.AllWorkTypes) {
+                        if (!pawn.WorkGroups.Any(g => g.Items.Contains(wt)))
+                            pawn.Pawn.workSettings.SetPriority(wt, 0);
                     }
 
-                    if (!wg.DisableTitleForThisWorkGroup)
-                        newTitle.Add(wg.Name);
+                    var seenTypes = new List<WorkTypeDef>();
+
+                    int currentPriority = 0;
+                    foreach (var wg in pawn.WorkGroups) {
+                        currentPriority++;
+
+                        currentPriority = Math.Min(currentPriority, _settings.MaxPriority);
+                        foreach (var wgi in wg.Items) {
+                            if (seenTypes.Contains(wgi))
+                                continue; // Only set each WorkType priority *once*. First-come-first-serve!!
+
+                            if (!disabled.Contains(wgi)) {
+                                pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
+                                pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                                var priorityAfter = pawn.Pawn.workSettings.GetPriority(wgi);
+
+                                if (priorityAfter != currentPriority)
+                                    Log.Warning(
+                                        $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {priorityAfter}!");
+                            }
+                            seenTypes.Add(wgi);
+                        }
+
+                        if (!wg.DisableTitleForThisWorkGroup)
+                            newTitle.Add(wg.Name);
+                    }    
                 }
 
                 if (_settings.ClearOutSchedules)
@@ -233,6 +242,16 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"- Looking for a {wg.Name}..");
 
                     var filteredPawns = pawns.Where(p => !p.WorkGroups.Contains(wg));
+                    if (_settings.ForcedBedRestForInjuredPawns) {
+                        var before = filteredPawns.Count();
+                        filteredPawns = filteredPawns.Where(p => !HealthAIUtility.ShouldSeekMedicalRest(p.Pawn));
+                        var after = filteredPawns.Count();
+
+                        if (before != after)
+                            LogHelper.Verbose(
+                                $"Filtered out {before - after} pawns due to recovering and ForcedBedRestForInjuredPawns");
+                    }
+
                     if (!_settings.SsInstalled ||
                         (_settings.SsInstalled && !wg.SlavesAllowed)) {
                         var before = filteredPawns.Count();

@@ -47,6 +47,10 @@ namespace The1nk.WorkGroups
             Widgets.CheckboxLabeled(cbLocation, "Clear Schedules?", ref WorkGroupsSettings.GetSettings.ClearOutSchedules);
 
             cbLocation.y += textHeight + verticalPadding;
+            Widgets.CheckboxLabeled(cbLocation, "Forced Best Rest for injured pawns?",
+                ref WorkGroupsSettings.GetSettings.ForcedBedRestForInjuredPawns);
+
+            cbLocation.y += textHeight + verticalPadding;
             Widgets.CheckboxLabeled(cbLocation, "Verbose Logging?", ref WorkGroupsSettings.GetSettings.VerboseLogging);
             
             cbLocation.y += textHeight + verticalPadding;

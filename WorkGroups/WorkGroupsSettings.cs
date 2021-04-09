@@ -55,6 +55,7 @@ namespace The1nk.WorkGroups
         public bool ClearOutSchedules = true;
         public List<WorkGroup> WorkGroups;
         public bool VerboseLogging = false;
+        public bool ForcedBedRestForInjuredPawns = true;
 
         public WorkGroupsSettings() {
             WorkGroups = new List<WorkGroup>();
@@ -70,6 +71,7 @@ namespace The1nk.WorkGroups
             Scribe_Values.Look(ref MaxPriority, "MaxPriority", 4, true);
             Scribe_Values.Look(ref HoursUpdateInterval, "HoursUpdateInterval", 2, true);
             Scribe_Values.Look(ref ClearOutSchedules, "ClearOutSchedules", true, true);
+            Scribe_Values.Look(ref ForcedBedRestForInjuredPawns, nameof(ForcedBedRestForInjuredPawns), true, false);
             Scribe_Collections.Look(ref WorkGroups, "WorkGroups", LookMode.Deep);
             Scribe_Values.Look(ref VerboseLogging, "VerboseLogging", false, true);
         }
