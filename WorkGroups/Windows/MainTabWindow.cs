@@ -154,12 +154,12 @@ namespace The1nk.WorkGroups.Windows
 
             string qtyBuffer = @group.TargetQuantity.ToString("0");
             txtRec = new Rect(newLoc);
-            txtRec.width = 80;
+            txtRec.width = 50;
             Widgets.TextFieldNumeric(txtRec, ref @group.TargetQuantity, ref qtyBuffer, 0, 999);
-            newLoc.x += 100;
+            newLoc.x += 70;
 
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.DisableTitleForThisWorkGroup, newLoc.height, !WorkGroupsSettings.GetSettings.SetPawnTitles);
-            newLoc.x += 70;
+            newLoc.x += 90;
             
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.AssignToEveryone, newLoc.height);
             newLoc.x += 70;
@@ -203,13 +203,13 @@ namespace The1nk.WorkGroups.Windows
             newLoc.x += 200;
 
             Widgets.Label(newLoc, "Edit");
-            newLoc.x += 120;
+            newLoc.x += 110;
 
             Widgets.Label(newLoc, "Target Qty");
-            newLoc.x += 100;
+            newLoc.x += 70;
 
             Widgets.Label(newLoc, "Hide Titles");
-            newLoc.x += 70;
+            newLoc.x += 90;
             
             Widgets.Label(newLoc, "Everyone");
             newLoc.x += 70;
