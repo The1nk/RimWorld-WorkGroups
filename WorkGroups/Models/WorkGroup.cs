@@ -15,8 +15,8 @@ namespace The1nk.WorkGroups.Models
         public bool PrisonersAllowed;
         public bool RjwWorkersAllowed;
 
-        public WorkGroup() {
-            Name = "New WorkGroup";
+        public WorkGroup(string name) {
+            Name = name;
             Items = new List<WorkTypeDef>();
             CanBeAssignedWith = new List<string>();
             DisableTitleForThisWorkGroup = false;

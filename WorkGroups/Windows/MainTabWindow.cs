@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld.QuestGen;
 using The1nk.WorkGroups.Models;
 using UnityEngine;
 using Verse;
@@ -72,13 +73,16 @@ namespace The1nk.WorkGroups.Windows
             btnDel.x += btnAdd.width + horizontalPadding;
 
             if (Widgets.ButtonText(btnAdd, "Add")) {
-                WorkGroupsSettings.GetSettings.WorkGroups.Add(new WorkGroup());
+                WorkGroupsSettings.GetSettings.WorkGroups.Add(
+                    new WorkGroup($"New WorkGroup {WorkGroupsSettings.GetSettings.WorkGroups.Count + 1}"));
             }
 
             if (Widgets.ButtonText(btnDel, "Del")) {
-                Find.WindowStack.Add(new FloatMenu(WorkGroups.WorkGroupsSettings.GetSettings.WorkGroups.Select(w =>
+                var lst = WorkGroups.WorkGroupsSettings.GetSettings.WorkGroups.Select(w =>
                     new FloatMenuOption($"Delete {w.Name}",
-                        () => { WorkGroups.WorkGroupsSettings.GetSettings.WorkGroups.Remove(w); })).ToList()));
+                        () => { WorkGroups.WorkGroupsSettings.GetSettings.WorkGroups.Remove(w); })).ToList();
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(lst));
             }
             cbLocation.y += textHeight + verticalPadding;
 
@@ -88,11 +92,17 @@ namespace The1nk.WorkGroups.Windows
             var btnLoad = new Rect(btnSave);
             btnLoad.x += btnSave.width + horizontalPadding;
 
-            if (Widgets.ButtonText(btnSave, "Save"))
-                Find.WindowStack.Add(new FloatMenu(GetSavePresetList()));
+            if (Widgets.ButtonText(btnSave, "Save")) {
+                var lst = GetSavePresetList();
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(GetSavePresetList()));
+            }
 
-            if (Widgets.ButtonText(btnLoad, "Load"))
-                Find.WindowStack.Add(new FloatMenu(GetLoadPresetList()));
+            if (Widgets.ButtonText(btnLoad, "Load")) {
+                var lst = GetLoadPresetList();
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(GetLoadPresetList()));
+            }
             cbLocation.y += textHeight + verticalPadding;
 
             DrawHeader(cbLocation);
@@ -134,7 +144,9 @@ namespace The1nk.WorkGroups.Windows
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
             if (Widgets.ButtonText(txtRec, "And..")) {
-                Find.WindowStack.Add(new FloatMenu(GetWorkGroupsList(group)));
+                var lst = GetWorkGroupsList(group);
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(lst));
             }
             TooltipHandler.TipRegion(txtRec,
                 "What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers.");

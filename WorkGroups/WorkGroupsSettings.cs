@@ -192,8 +192,7 @@ namespace The1nk.WorkGroups {
 
         private WorkGroup GetWorkGroupFromSaveLine(string line, string save, int lineNum) {
             var lines = System.IO.File.ReadAllLines(System.IO.Path.Combine(GetSaveDir(), save + ".wg." + lineNum));
-            var grp = new WorkGroup {
-                Name = line,
+            var grp = new WorkGroup (line) {
                 DisableTitleForThisWorkGroup = bool.Parse(lines[0]),
                 TargetQuantity = int.Parse(lines[1]),
                 AssignToEveryone = bool.Parse(lines[2]),
