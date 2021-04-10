@@ -5,7 +5,7 @@
     <defName>WorkGroups</defName>
     <label>WorkGroups</label>
     <description>Create WorkGroups for automating labor</description>
-    <tabWindowClass>The1nk.WorkGroups.MainTabWindow</tabWindowClass>
+    <tabWindowClass>The1nk.WorkGroups.Windows.MainTabWindow</tabWindowClass>
 	<validWithoutMap>true</validWithoutMap>
 	<minimized>True</minimized>
 	<iconPath>WorkGroups/WGSymbol</iconPath>	

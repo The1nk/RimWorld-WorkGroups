@@ -5,7 +5,7 @@ using The1nk.WorkGroups.Models;
 using UnityEngine;
 using Verse;
 
-namespace The1nk.WorkGroups
+namespace The1nk.WorkGroups.Windows
 {
     [StaticConstructorOnStartup]
     public class MainTabWindow : RimWorld.MainTabWindow {
@@ -283,8 +283,14 @@ namespace The1nk.WorkGroups
 
             ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
             
-            // Todo: add a "new" option
-            ret.Add(new FloatMenuOption("New", () => WorkGroupsSettings.GetSettings.SaveToPreset("Newww")));
+            ret.Add(new FloatMenuOption("New", () => {
+                var newTextWindow = new RenameWindow("New");
+                Action<string> saveAction = name => {
+                    WorkGroupsSettings.GetSettings.SaveToPreset(name);
+                };
+                newTextWindow.Action = saveAction;
+                Find.WindowStack.Add(newTextWindow);
+            }));
 
             return ret;
         }
