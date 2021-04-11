@@ -80,6 +80,9 @@
     <Content Include="RestOfModGoesHere\About\PublishedFileId.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="RestOfModGoesHere\Languages\English\Keyed\English_Keyed.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RestOfModGoesHere\Textures\WorkGroups\WGSymbol.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
