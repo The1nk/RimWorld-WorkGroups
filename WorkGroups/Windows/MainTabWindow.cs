@@ -156,6 +156,18 @@ namespace The1nk.WorkGroups.Windows
                 "What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers.");
             newLoc.x += 60;
 
+            txtRec = new Rect(newLoc);
+            txtRec.width = 40;
+            if (Widgets.ButtonText(txtRec, "Stats")) {
+                var lst = GetStatsList(group);
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(lst));
+            }
+
+            TooltipHandler.TipRegion(txtRec,
+                "What Stats are important for this WorkGroup. These act as a multiplier for the skill value. A pawn with Lv8 in Plants and 2 field hands will be selected over a pawn with Lv10 in Plants, if Plant Work Speed is selected.");
+            newLoc.x += 60;
+
             string qtyBuffer = @group.TargetQuantity.ToString("0");
             txtRec = new Rect(newLoc);
             txtRec.width = 50;
@@ -207,7 +219,7 @@ namespace The1nk.WorkGroups.Windows
             newLoc.x += 200;
 
             Widgets.Label(newLoc, "Edit");
-            newLoc.x += 110;
+            newLoc.x += 160;
 
             Widgets.Label(newLoc, "Target Qty");
             newLoc.x += 70;
@@ -276,6 +288,24 @@ namespace The1nk.WorkGroups.Windows
                 .Where(g => !group.CanBeAssignedWith.Contains(g) && group.Name != g)
                 .OrderBy(g => g)
                 .Select(g => new FloatMenuOption($"DISABLED | {g}", () => group.CanBeAssignedWith.Add(g))));
+
+            return ret;
+        }
+
+        private List<FloatMenuOption> GetStatsList(WorkGroup group) {
+            var ret = new List<FloatMenuOption>();
+            
+            // Enabled ones
+            ret.AddRange(group.ImportantStats.Select(wt =>
+                new FloatMenuOption($"ENABLED | {wt.LabelForFullStatListCap}", () => group.ImportantStats.Remove(wt))));
+
+            ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+
+            // Disabled ones
+            ret.AddRange(WorkGroupsSettings.GetSettings.AllStatDefs.Where(wt => !group.ImportantStats.Contains(wt))
+                .Select(wt =>
+                    new FloatMenuOption($"DISABLED | {wt.LabelForFullStatListCap}",
+                        () => group.ImportantStats.Add(wt))));
 
             return ret;
         }

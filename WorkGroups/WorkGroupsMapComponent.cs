@@ -93,6 +93,7 @@ namespace The1nk.WorkGroups {
             _settings.PlInstalled = PlMethod != null;
 
             _settings.AllWorkTypes = FetchWorkTypes(ref _settings.AllWorkTypes);
+            _settings.AllStatDefs = FetchStatDefs(ref _settings.AllStatDefs);
 
             if (!Current.Game.playSettings.useWorkPriorities) {
                 Current.Game.playSettings.useWorkPriorities = true;
@@ -118,21 +119,52 @@ namespace The1nk.WorkGroups {
                         }
                     }
                 }
+
+                for (int i = 0; i < wg.ImportantStats.Count; i++) {
+                    var sd = wg.ImportantStats[i];
+                    if (sd == null) {
+                        LogHelper.Warning($"Found null ImportantStat on group '{wg.Name}', position {i + 1}. Removing..");
+                        wg.ImportantStats.RemoveAt(i);
+                        i--;
+                    }
+                    else {
+                        if (!_settings.AllStatDefs.Any(sdD => sdD == sd)) {
+                            LogHelper.Warning($"ImportantStat on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
+                            wg.Items.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
             }
 
             prepped = true;
             LogHelper.Verbose("-Prep()");
         }
 
+        private IEnumerable<StatDef> FetchStatDefs(ref IEnumerable<StatDef> allStatDefs) {
+            if (allStatDefs.Any())
+                return allStatDefs;
+
+            var sdList = allStatDefs as List<StatDef>;
+
+            sdList.AddRange(DefDatabase<StatDef>.AllDefsListForReading.Where(d => !d.alwaysHide && d.showOnPawns)
+                .OrderBy(d => d.category.displayOrder).ThenBy(d => d.displayPriorityInCategory));
+
+            sdList.ForEach(d => LogHelper.Verbose($"--{d.LabelForFullStatListCap}, defName = '{d.defName}'"));
+
+            return sdList;
+        }
+
         private IEnumerable<WorkTypeDef> FetchWorkTypes(ref IEnumerable<WorkTypeDef> allWorkTypes) {
-            if (!allWorkTypes.Any()) {
-                var awtList = allWorkTypes as List<WorkTypeDef>;
+            if (allWorkTypes.Any())
+                return allWorkTypes;
 
-                awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
-                    .OrderByDescending(d => d.naturalPriority));
+            var awtList = allWorkTypes as List<WorkTypeDef>;
 
-                awtList.ForEach(w => LogHelper.Verbose($"--{w.labelShort}, defName = '{w.defName}'"));
-            }
+            awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
+                .OrderByDescending(d => d.naturalPriority));
+
+            awtList.ForEach(w => LogHelper.Verbose($"--{w.labelShort}, defName = '{w.defName}'"));
 
             return allWorkTypes;
         }
@@ -314,7 +346,7 @@ namespace The1nk.WorkGroups {
                                     if (_settings.UseLearningRates)
                                         multiplier = pawnSkill.LearnRateFactor();
 
-                                    thisPawnsSkill += multiplier * pawnSkill.Level;
+                                    thisPawnsSkill += multiplier * (pawnSkill.Level + 1); // This stupid +1 insures that if a pawn's level is 0, their stats still matter in the ImportantStats section below
                                 }
                             else
                                 thisPawnsSkill += 3f;
@@ -323,6 +355,10 @@ namespace The1nk.WorkGroups {
                         }
 
                         thisPawnsSkill /= cnt;
+
+                        foreach (var importantStat in wg.ImportantStats) {
+                            thisPawnsSkill *= pawn.Pawn.GetStatValue(importantStat);
+                        }
 
                         if (!(thisPawnsSkill > averageSkill)) continue;
                         bestPawn = pawn;

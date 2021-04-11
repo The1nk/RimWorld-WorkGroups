@@ -46,6 +46,7 @@ namespace The1nk.WorkGroups {
         }
 
         public WorkGroupsMapComponent Component { get; set; }
+        public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
 
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
 
@@ -150,6 +151,12 @@ namespace The1nk.WorkGroups {
                     grpLines.Add(cbaw);
                 }
 
+                grpLines.Add("---");
+
+                foreach (var stat in grp.ImportantStats) {
+                    grpLines.Add(stat.defName);
+                }
+
                 DeleteIfExists(System.IO.Path.Combine(GetSaveDir(), save + ".wg" + grpCounter));
                 System.IO.File.WriteAllLines(System.IO.Path.Combine(GetSaveDir(), save + ".wg." + grpCounter), grpLines);
                 grpCounter++;
@@ -184,7 +191,7 @@ namespace The1nk.WorkGroups {
                     WorkGroups.Clear();
 
                     for (int i = 12; i < lines.Length; i++) {
-                        WorkGroups.Add(GetWorkGroupFromSaveLine(lines[i], save, i-10));
+                        WorkGroups.Add(GetWorkGroupFromSaveLine(lines[i], save, i-11));
                     }
 
                     break;
@@ -206,20 +213,29 @@ namespace The1nk.WorkGroups {
                 RjwWorkersAllowed = bool.Parse(lines[6])
             };
 
-            bool settingAllowedGroups = false;
+            var mode = 1;
             for (int i = 7; i < lines.Length; i++) {
                 if (lines[i] == "---") {
-                    settingAllowedGroups = true;
+                    mode++;
                     continue;
                 }
 
-                if (!settingAllowedGroups) {
-                    var wt = GetSettings.AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
-                    if (wt != null)
-                        grp.Items.Add(wt);
-                }
-                else {
-                    grp.CanBeAssignedWith.Add(lines[i]);
+                switch (mode) {
+                    case 1:
+                        var wt = GetSettings.AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
+                        if (wt != null)
+                            grp.Items.Add(wt);
+                        break;
+
+                    case 2:
+                        grp.CanBeAssignedWith.Add(lines[i]);
+                        break;
+
+                    case 3:
+                        var sd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        if (sd != null)
+                            grp.ImportantStats.Add(sd);
+                        break;
                 }
             }
 
