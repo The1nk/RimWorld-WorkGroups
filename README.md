@@ -13,6 +13,9 @@ I wanted this mod so I could focus on more "adding skilled pawns" and less "shuf
  * (Optionally) Enable/Disable a WorkGroup to be set for Slaves (Simple Slavery support),
  * (Optionally) Enable/Disable a WorkGroup to be set for Prisoners (Prison Labor support),
  * (Optionally) Force bed rest on injured pawns, allowing them to heal while other pawns pick up their slack (if they're not dead..)
+ * Save and Load all the settings at your whim! Super convenient for starting new colonies for us habitual restarters..
+ * (Optionally) Use Learning Rate to be a factor in who gets assigned to which WorkGroups!
+ * (Optionally) Select Important Stats for a given WorkGroup - utilize your bionic pawns capabilities to their fullest potential!
 
 ## Notes
  * Save friendly! If adding to an existing save, note that it starts out disabled. You'll need to enable it via the new WorkGroups button on the tab bar at the bottom of your screen.
