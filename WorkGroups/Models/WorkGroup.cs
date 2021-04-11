@@ -31,6 +31,10 @@ namespace The1nk.WorkGroups.Models
             ImportantStats = new List<StatDef>();
         }
 
+        public WorkGroup() {
+            
+        }
+
         public void ExposeData() {
             Scribe_Values.Look(ref Name, "Name");
             Scribe_Collections.Look(ref Items, "Items", LookMode.Def);

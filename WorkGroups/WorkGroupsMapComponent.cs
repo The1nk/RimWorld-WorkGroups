@@ -104,6 +104,9 @@ namespace The1nk.WorkGroups {
             }
 
             foreach (var wg in _settings.WorkGroups) {
+                if (wg.ImportantStats == null)
+                    wg.ImportantStats = new List<StatDef>(); // Upgrade from 1.0 to 1.1
+
                 for (int i = 0; i < wg.Items.Count; i++) {
                     var wt = wg.Items[i]; 
                     if (wt == null) {

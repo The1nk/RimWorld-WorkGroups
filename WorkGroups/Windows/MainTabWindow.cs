@@ -294,7 +294,7 @@ namespace The1nk.WorkGroups.Windows
 
         private List<FloatMenuOption> GetStatsList(WorkGroup group) {
             var ret = new List<FloatMenuOption>();
-            
+
             // Enabled ones
             ret.AddRange(group.ImportantStats.Select(wt =>
                 new FloatMenuOption($"ENABLED | {wt.LabelForFullStatListCap}", () => group.ImportantStats.Remove(wt))));
