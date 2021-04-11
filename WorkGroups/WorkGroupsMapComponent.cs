@@ -306,7 +306,19 @@ namespace The1nk.WorkGroups {
                         int cnt = 0;
 
                         foreach (var wgItem in wg.Items) {
-                            thisPawnsSkill += pawn.Pawn.skills.AverageOfRelevantSkillsFor(wgItem);
+                            if (wgItem.relevantSkills.Any())
+                                foreach (var skill in wgItem.relevantSkills) {
+                                    var multiplier = 1f;
+                                    var pawnSkill = pawn.Pawn.skills.GetSkill(skill);
+
+                                    if (_settings.UseLearningRates)
+                                        multiplier = pawnSkill.LearnRateFactor();
+
+                                    thisPawnsSkill += multiplier * pawnSkill.Level;
+                                }
+                            else
+                                thisPawnsSkill += 3f;
+
                             cnt++;
                         }
 

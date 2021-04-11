@@ -60,6 +60,7 @@ namespace The1nk.WorkGroups {
         public List<WorkGroup> WorkGroups;
         public bool VerboseLogging = false;
         public bool ForcedBedRestForInjuredPawns = true;
+        public bool UseLearningRates;
 
         private string _baseDir = "";
 
@@ -77,9 +78,10 @@ namespace The1nk.WorkGroups {
             Scribe_Values.Look(ref MaxPriority, "MaxPriority", 4, true);
             Scribe_Values.Look(ref HoursUpdateInterval, "HoursUpdateInterval", 2, true);
             Scribe_Values.Look(ref ClearOutSchedules, "ClearOutSchedules", true, true);
-            Scribe_Values.Look(ref ForcedBedRestForInjuredPawns, nameof(ForcedBedRestForInjuredPawns), true, false);
+            Scribe_Values.Look(ref ForcedBedRestForInjuredPawns, "ForcedBedRestForInjuredPawns", true, false);
             Scribe_Collections.Look(ref WorkGroups, "WorkGroups", LookMode.Deep);
             Scribe_Values.Look(ref VerboseLogging, "VerboseLogging", false, true);
+            Scribe_Values.Look(ref UseLearningRates, "UseLearningRates", false, true);
 
         }
 
@@ -123,6 +125,7 @@ namespace The1nk.WorkGroups {
             lines.Add(ClearOutSchedules.ToString());
             lines.Add(VerboseLogging.ToString());
             lines.Add(ForcedBedRestForInjuredPawns.ToString());
+            lines.Add(UseLearningRates.ToString());
 
             int grpCounter = 1;
             foreach (var grp in WorkGroups) {
@@ -176,10 +179,11 @@ namespace The1nk.WorkGroups {
                     ClearOutSchedules = bool.Parse(lines[8]);
                     VerboseLogging = bool.Parse(lines[9]);
                     ForcedBedRestForInjuredPawns = bool.Parse(lines[10]);
+                    UseLearningRates = bool.Parse(lines[11]);
 
                     WorkGroups.Clear();
 
-                    for (int i = 11; i < lines.Length; i++) {
+                    for (int i = 12; i < lines.Length; i++) {
                         WorkGroups.Add(GetWorkGroupFromSaveLine(lines[i], save, i-10));
                     }
 

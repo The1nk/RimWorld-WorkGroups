@@ -53,6 +53,10 @@ namespace The1nk.WorkGroups.Windows
                 ref WorkGroupsSettings.GetSettings.ForcedBedRestForInjuredPawns);
 
             cbLocation.y += textHeight + verticalPadding;
+            Widgets.CheckboxLabeled(cbLocation, "Consider Learning Rate when selecting best pawn?",
+                ref WorkGroupsSettings.GetSettings.UseLearningRates);
+
+            cbLocation.y += textHeight + verticalPadding;
             Widgets.CheckboxLabeled(cbLocation, "Verbose Logging?", ref WorkGroupsSettings.GetSettings.VerboseLogging);
             
             cbLocation.y += textHeight + verticalPadding;
