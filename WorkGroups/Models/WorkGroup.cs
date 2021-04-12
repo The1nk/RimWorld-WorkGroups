@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -16,6 +17,8 @@ namespace The1nk.WorkGroups.Models
         public bool PrisonersAllowed;
         public bool RjwWorkersAllowed;
         public List<StatDef> ImportantStats;
+        public List<StatDef> HighStats;
+        public List<StatDef> LowStats;
 
         public WorkGroup(string name) {
             Name = name;
@@ -29,11 +32,15 @@ namespace The1nk.WorkGroups.Models
             PrisonersAllowed = false;
             RjwWorkersAllowed = false;
             ImportantStats = new List<StatDef>();
+            HighStats = new List<StatDef>();
+            LowStats = new List<StatDef>();
         }
 
         public WorkGroup() {
             
         }
+
+        
 
         public void ExposeData() {
             Scribe_Values.Look(ref Name, "Name");
@@ -47,6 +54,8 @@ namespace The1nk.WorkGroups.Models
             Scribe_Values.Look(ref PrisonersAllowed, "PrisonersAllowed");
             Scribe_Values.Look(ref RjwWorkersAllowed, "RjwWorkersAllowed");
             Scribe_Collections.Look(ref ImportantStats, "ImportantStats", LookMode.Def);
+            Scribe_Collections.Look(ref HighStats, "HighStats", LookMode.Def);
+            Scribe_Collections.Look(ref LowStats, "LowStats", LookMode.Def);
         }
     }
 }

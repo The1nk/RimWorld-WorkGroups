@@ -47,4 +47,12 @@
   <NewWorkGroup>New WorkGroup {0}</NewWorkGroup>
   <DeleteWorkGroup>Delete {0}</DeleteWorkGroup>
   <ddNew>New</ddNew>
+
+  <!-- Stats -->
+  <HighStats>High Stats</HighStats>
+  <HighStatsTip>These are Stats that we consider higher as better (e.g., Butchery Speed, Butchery Efficiency)</HighStatsTip>
+  <AllStats>All Stats</AllStats>
+  <AllStatsTip><![CDATA[All available stats. Use the "<" and ">" buttons to move them between lists.]]></AllStatsTip>
+  <LowStats>Low Stats</LowStats>
+  <LowStatsTip>These are Stats that we consider lower as better (e.g., Food Poison Chance)</LowStatsTip>
 </LanguageData>

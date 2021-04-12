@@ -20,6 +20,7 @@ namespace The1nk.WorkGroups.Windows
 
         public override void DoWindowContents(UnityEngine.Rect inRect) {
             base.DoWindowContents(inRect);
+
             string buffer = WorkGroupsSettings.GetSettings.HoursUpdateInterval.ToString("0");
             string buffer2 = WorkGroupsSettings.GetSettings.MaxPriority.ToString("0");
 
@@ -159,9 +160,7 @@ namespace The1nk.WorkGroups.Windows
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
             if (Widgets.ButtonText(txtRec, "btnStats".Translate())) {
-                var lst = GetStatsList(group);
-                if (lst.Any())
-                    Find.WindowStack.Add(new FloatMenu(lst));
+                Find.WindowStack.Add(new StatsPicker(group.HighStats, group.LowStats));
             }
 
             TooltipHandler.TipRegion(txtRec,

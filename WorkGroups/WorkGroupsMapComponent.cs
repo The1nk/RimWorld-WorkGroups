@@ -129,14 +129,26 @@ namespace The1nk.WorkGroups {
                         LogHelper.Warning($"Found null ImportantStat on group '{wg.Name}', position {i + 1}. Removing..");
                         wg.ImportantStats.RemoveAt(i);
                         i--;
+                        continue;
                     }
                     else {
                         if (!_settings.AllStatDefs.Any(sdD => sdD == sd)) {
                             LogHelper.Warning($"ImportantStat on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
                             wg.Items.RemoveAt(i);
                             i--;
+                            continue;
                         }
                     }
+
+                    // Convert ImportantStats to HighStats
+                    if (wg.HighStats == null)
+                        wg.HighStats = new List<StatDef>();
+                    if (wg.LowStats == null)
+                        wg.LowStats = new List<StatDef>();
+
+                    wg.HighStats.Add(wg.ImportantStats[i]);
+                    wg.ImportantStats.RemoveAt(i);
+                    i--;
                 }
             }
 

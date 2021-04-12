@@ -47,7 +47,6 @@ namespace The1nk.WorkGroups {
 
         public WorkGroupsMapComponent Component { get; set; }
         public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
-
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
 
         public bool Enabled = false;
@@ -153,7 +152,13 @@ namespace The1nk.WorkGroups {
 
                 grpLines.Add("---");
 
-                foreach (var stat in grp.ImportantStats) {
+                foreach (var stat in grp.HighStats) {
+                    grpLines.Add(stat.defName);
+                }
+
+                grpLines.Add("---");
+
+                foreach (var stat in grp.LowStats) {
                     grpLines.Add(stat.defName);
                 }
 
@@ -191,7 +196,27 @@ namespace The1nk.WorkGroups {
                     WorkGroups.Clear();
 
                     for (int i = 12; i < lines.Length; i++) {
-                        WorkGroups.Add(GetWorkGroupFromSaveLine(lines[i], save, i-11));
+                        WorkGroups.Add(GetWorkGroupFromSaveLine1dot1(lines[i], save, i-11));
+                    }
+
+                    break;
+                case "1.2.0":
+                    Enabled = bool.Parse(lines[1]);
+                    SetPrioritiesForSlaves = bool.Parse(lines[2]);
+                    SetPrioritiesForPrisoners = bool.Parse(lines[3]);
+                    SetPrioritiesForRjwWorkers = bool.Parse(lines[4]);
+                    SetPawnTitles = bool.Parse(lines[5]);
+                    MaxPriority = int.Parse(lines[6]);
+                    HoursUpdateInterval = int.Parse(lines[7]);
+                    ClearOutSchedules = bool.Parse(lines[8]);
+                    VerboseLogging = bool.Parse(lines[9]);
+                    ForcedBedRestForInjuredPawns = bool.Parse(lines[10]);
+                    UseLearningRates = bool.Parse(lines[11]);
+
+                    WorkGroups.Clear();
+
+                    for (int i = 12; i < lines.Length; i++) {
+                        WorkGroups.Add(GetWorkGroupFromSaveLine1dot2(lines[i], save, i-11));
                     }
 
                     break;
@@ -201,7 +226,7 @@ namespace The1nk.WorkGroups {
             }
         }
 
-        private WorkGroup GetWorkGroupFromSaveLine(string line, string save, int lineNum) {
+        private WorkGroup GetWorkGroupFromSaveLine1dot1(string line, string save, int lineNum) {
             var lines = System.IO.File.ReadAllLines(System.IO.Path.Combine(GetSaveDir(), save + ".wg." + lineNum));
             var grp = new WorkGroup (line) {
                 DisableTitleForThisWorkGroup = bool.Parse(lines[0]),
@@ -234,7 +259,54 @@ namespace The1nk.WorkGroups {
                     case 3:
                         var sd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
                         if (sd != null)
-                            grp.ImportantStats.Add(sd);
+                            grp.HighStats.Add(sd); // ImportantStats turn into HighStats
+                        break;
+                }
+            }
+
+            return grp;
+        }
+
+        private WorkGroup GetWorkGroupFromSaveLine1dot2(string line, string save, int lineNum) {
+            var lines = System.IO.File.ReadAllLines(System.IO.Path.Combine(GetSaveDir(), save + ".wg." + lineNum));
+            var grp = new WorkGroup (line) {
+                DisableTitleForThisWorkGroup = bool.Parse(lines[0]),
+                TargetQuantity = int.Parse(lines[1]),
+                AssignToEveryone = bool.Parse(lines[2]),
+                ColonistsAllowed = bool.Parse(lines[3]),
+                SlavesAllowed = bool.Parse(lines[4]),
+                PrisonersAllowed = bool.Parse(lines[5]),
+                RjwWorkersAllowed = bool.Parse(lines[6])
+            };
+
+            var mode = 1;
+            for (int i = 7; i < lines.Length; i++) {
+                if (lines[i] == "---") {
+                    mode++;
+                    continue;
+                }
+
+                switch (mode) {
+                    case 1:
+                        var wt = GetSettings.AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
+                        if (wt != null)
+                            grp.Items.Add(wt);
+                        break;
+
+                    case 2:
+                        grp.CanBeAssignedWith.Add(lines[i]);
+                        break;
+
+                    case 3:
+                        var sd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        if (sd != null)
+                            grp.HighStats.Add(sd);
+                        break;
+
+                    case 4:
+                        var sdd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        if (sdd != null)
+                            grp.LowStats.Add(sdd);
                         break;
                 }
             }
