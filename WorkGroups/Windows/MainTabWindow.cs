@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using RimWorld.QuestGen;
 using The1nk.WorkGroups.Models;
 using UnityEngine;
@@ -144,7 +145,7 @@ namespace The1nk.WorkGroups.Windows
 
             TooltipHandler.TipRegion(txtRec,
                 "ttJobs".Translate());
-            newLoc.x += 60;
+            newLoc.x += 45;
 
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
@@ -155,7 +156,7 @@ namespace The1nk.WorkGroups.Windows
             }
             TooltipHandler.TipRegion(txtRec,
                 "ttAnd".Translate());
-            newLoc.x += 60;
+            newLoc.x += 45;
 
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
@@ -165,7 +166,25 @@ namespace The1nk.WorkGroups.Windows
 
             TooltipHandler.TipRegion(txtRec,
                 "ttStats".Translate());
-            newLoc.x += 60;
+            newLoc.x += 45;
+
+            txtRec = new Rect(newLoc);
+            txtRec.width = 40;
+            if (Widgets.ButtonText(txtRec, "btnTraits".Translate())) {
+                if (group.TraitsMustHave == null)
+                    group.TraitsMustHave = new List<Trait>();
+                if (group.TraitsWantToHave == null)
+                    group.TraitsWantToHave = new List<Trait>();
+                if (group.TraitsCantHave == null)
+                    group.TraitsCantHave = new List<Trait>();
+
+                Find.WindowStack.Add(new TraitsPicker(group.TraitsMustHave, group.TraitsWantToHave,
+                    group.TraitsCantHave));
+            }
+
+            TooltipHandler.TipRegion(txtRec,
+                "ttTraits".Translate());
+            newLoc.x += 45;
 
             string qtyBuffer = @group.TargetQuantity.ToString("0");
             txtRec = new Rect(newLoc);
@@ -218,7 +237,7 @@ namespace The1nk.WorkGroups.Windows
             newLoc.x += 200;
 
             Widgets.Label(newLoc, "gpEdit".Translate());
-            newLoc.x += 160;
+            newLoc.x += 180;
 
             Widgets.Label(newLoc, "gpTargetQty".Translate());
             newLoc.x += 70;

@@ -27,11 +27,11 @@ namespace The1nk.WorkGroups.Windows
         public override Vector2 InitialSize => new Vector2(800, 650);
 
         public StatsPicker(IList<StatDef> highStats, IList<StatDef> lowStats) {
-            LogHelper.Warning("Params");
             _highStats = highStats;
             _lowStats = lowStats;
 
             this.doCloseX = true;
+            this.absorbInputAroundWindow = true;
             RefreshAllStats();
         }
 
@@ -42,9 +42,6 @@ namespace The1nk.WorkGroups.Windows
         }
 
         public override void DoWindowContents(Rect inRect) {
-            GameFont font;
-            font = Text.Font;
-
             var r1 = inRect.GetInnerRect();
             r1.width = 230f;
             r1.height = 550;
@@ -55,28 +52,22 @@ namespace The1nk.WorkGroups.Windows
             header.x += 30;
 
             // High Stats
-            Text.Font = GameFont.Medium;
             Widgets.Label(header, "HighStats".Translate());
             TooltipHandler.TipRegion(header, "HighStatsTip".Translate());
-            Text.Font = font;
             DrawStatsList(r1, _highStats, ref _scroll1, WhichList.HighStats);
             r1.x += 232;
             header.x += 232;
 
             // All Stats
-            Text.Font = GameFont.Medium;
             Widgets.Label(header, "AllStats".Translate());
             TooltipHandler.TipRegion(header, "AllStatsTip".Translate());
-            Text.Font = font;
             DrawStatsList(r1, _allStats, ref _scroll2, WhichList.AllStats);
             r1.x += 232;
             header.x += 232;
 
             // Low Stats
-            Text.Font = GameFont.Medium;
             Widgets.Label(header, "LowStats".Translate());
             TooltipHandler.TipRegion(header, "LowStatsTip".Translate());
-            Text.Font = font;
             DrawStatsList(r1, _lowStats, ref _scroll3, WhichList.LowStats);
         }
 

@@ -62,6 +62,7 @@
     <Compile Include="Models\UniqueId.cs" />
     <Compile Include="Models\WorkGroup.cs" />
     <Compile Include="Windows\RenameWindow.cs" />
+    <Compile Include="Windows\TraitsPicker.cs" />
     <Compile Include="Windows\StatsPicker.cs" />
     <Compile Include="WorkGroupsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

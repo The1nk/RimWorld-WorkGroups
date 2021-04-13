@@ -19,6 +19,9 @@ namespace The1nk.WorkGroups.Models
         public List<StatDef> ImportantStats;
         public List<StatDef> HighStats;
         public List<StatDef> LowStats;
+        public List<Trait> TraitsMustHave;
+        public List<Trait> TraitsWantToHave;
+        public List<Trait> TraitsCantHave;
 
         public WorkGroup(string name) {
             Name = name;
@@ -34,13 +37,14 @@ namespace The1nk.WorkGroups.Models
             ImportantStats = new List<StatDef>();
             HighStats = new List<StatDef>();
             LowStats = new List<StatDef>();
+            TraitsMustHave = new List<Trait>();
+            TraitsWantToHave = new List<Trait>();
+            TraitsCantHave = new List<Trait>();
         }
 
         public WorkGroup() {
             
         }
-
-        
 
         public void ExposeData() {
             Scribe_Values.Look(ref Name, "Name");
@@ -56,6 +60,9 @@ namespace The1nk.WorkGroups.Models
             Scribe_Collections.Look(ref ImportantStats, "ImportantStats", LookMode.Def);
             Scribe_Collections.Look(ref HighStats, "HighStats", LookMode.Def);
             Scribe_Collections.Look(ref LowStats, "LowStats", LookMode.Def);
+            Scribe_Collections.Look(ref TraitsMustHave, "TraitsMustHave", LookMode.Deep);
+            Scribe_Collections.Look(ref TraitsWantToHave, "TraitsWantToHave", LookMode.Deep);
+            Scribe_Collections.Look(ref TraitsCantHave, "TraitsCantHave", LookMode.Deep);
         }
     }
 }

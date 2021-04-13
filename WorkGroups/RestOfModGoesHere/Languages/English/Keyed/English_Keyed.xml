@@ -55,4 +55,17 @@
   <AllStatsTip><![CDATA[All available stats. Use the "<" and ">" buttons to move them between lists.]]></AllStatsTip>
   <LowStats>Low Stats</LowStats>
   <LowStatsTip>These are Stats that we consider lower as better (e.g., Food Poison Chance)</LowStatsTip>
+
+  <!-- Traits -->
+  <btnTraits>Traits</btnTraits>
+  <ttTraits>Select Traits that must be on Pawns for this WorkGroup, Want to have on this WorkGroup, or Can't have on this WorkGroup</ttTraits>
+  <MustHaves>Must Haves</MustHaves>
+  <MustHavesTip>Pawns who are missing any of the Traits in this list will not be selected for this WorkGroup</MustHavesTip>
+  <WantToHaves>Want to Haves</WantToHaves>
+  <WantToHavesTip>Pawns who have some of the Traits in this list will be selected over Pawns who have none of them</WantToHavesTip>
+  <CantHaves>Can't Haves</CantHaves>
+  <CantHavesTip>Pawns who have any of the Traits in this list will not be selected for this WorkGroup</CantHavesTip>
+  <AllTraits>All Traits</AllTraits>
+  <AllTraitsTip>All Available Traits</AllTraitsTip>
+
 </LanguageData>

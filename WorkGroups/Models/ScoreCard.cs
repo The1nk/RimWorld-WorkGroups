@@ -35,6 +35,7 @@ namespace The1nk.WorkGroups.Models {
         public float Skill;
         public List<ScoreCardEntryStat> Stats;
         public float FinalModifier = 1;
+        public bool HasSomeWantedTraits;
 
         public float FinalScore => Skill * FinalModifier;
 
