@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<LanguageData>
+  <!-- Global Settings -->
+  <cbEnabled>启用</cbEnabled>
+  <cbSlavePriorities>奴隶可成为小队成员? (需求Simple Slavery)</cbSlavePriorities>
+  <cbPrisonerPriorities>囚犯可成为小队成员? (需求Prison Labor)</cbPrisonerPriorities>
+  <cbRjwPriorities>妓术工作者可成为小队成员? (需求RimJobWorld)</cbRjwPriorities>
+  <cbSetPawnTitles>给小人贴上小队标签名字? (配合"显示标签"功能很适合Guards For Me)</cbSetPawnTitles>
+  <cbClearSchedules>将新殖民者的时刻表全设为"任何"?</cbClearSchedules>
+  <cbForceBedRest>是否强制病患卧床休息?</cbForceBedRest>
+  <cbUseLearningRates>学习速度也作为衡量标准(即技能等级相同时，优先考虑学习速度快的)?</cbUseLearningRates>
+  <cbVerboseLogging>详尽日志?</cbVerboseLogging>
+  <UpdateInterval>每隔X小时更新一次工作优先级</UpdateInterval>
+  <MaxPriority>最高优先级别</MaxPriority>
+  
+  <!-- Buttons in Global section -->
+  <btnAdd>新增</btnAdd>
+  <btnDel>删除</btnDel>
+  <btnSave>保存</btnSave>
+  <btnLoad>载入</btnLoad>
+
+  <!-- Headers -->
+  <gpName>小队名称</gpName>
+  <gpEdit>设定</gpEdit>
+  <gpTargetQty>小队人数</gpTargetQty>
+  <gpHideTitles>隐藏标签</gpHideTitles>
+  <gpEveryone>所有人</gpEveryone>
+  <gpColonists>殖民者</gpColonists>
+  <gpSlaves>奴隶</gpSlaves>
+  <gpPrisoners>囚犯</gpPrisoners>
+  <gpWhores>妓术工作者</gpWhores>
+
+
+  <!-- Group-level items -->
+  <btnJobs>职责</btnJobs>
+  <ttJobs>该小队的职责。若一个小队可进行所有类型的工作，那每个工作的优先级会一样。</ttJobs>
+  <btnAnd>兼任..</btnAnd>
+  <ttAnd>已属该小队的成员可同时分别兼任其他所选小队的工作。这适用于该小队某个成员拥有其他擅长的工作或你想让其兼任其他工作的情况。</ttAnd>
+  <btnStats>能力</btnStats>
+  <ttStats>该小队最重视的属性。所选属性也会成为衡量标准。例如，当选中种植速度为标准时，Mod会将同时包括8级种植技能和一双务农手的小人编入小队而非仅10级种植技能的小人。</ttStats>
+
+  <!-- dropdowns -->
+  <ddEnabled>已允许 | {0}</ddEnabled>
+  <ddDisabled>已禁止 | {0}</ddDisabled>
+
+  <!-- prefixes -->
+  <NewWorkGroup>小队{0}</NewWorkGroup>
+  <DeleteWorkGroup>删除 {0}</DeleteWorkGroup>
+  <ddNew>小队配置</ddNew>
+</LanguageData>
