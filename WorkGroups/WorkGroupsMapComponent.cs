@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using RimWorld;
 using The1nk.WorkGroups.Models;
 using Verse;
@@ -65,7 +66,6 @@ namespace The1nk.WorkGroups {
                 madeChanges = true;
             if (madeChanges) ApplyPriorities(ref pawns, _settings.SetPawnTitles);
         }
-
         private void Prep() {
             if (prepped)
                 return;
@@ -331,10 +331,11 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} Prisoners due to WorkGroup setting disabled");
                     }
 
-                    foreach (var pawn in filteredPawns) {
-                        if (pawn.Pawn.Downed || pawn.Pawn.Dead || pawn.Pawn.InMentalState)
-                            continue;
+                    filteredPawns = filteredPawns.Where(p =>
+                        !p.Pawn.Downed && !p.Pawn.Dead && !p.Pawn.InMentalState && p.Pawn.Spawned);
 
+                    var card = new ScoreCard();
+                    foreach (var pawn in filteredPawns) {
                         var disabled = pawn.Pawn.GetDisabledWorkTypes();
                         if (wg.Items.All(w => disabled.Contains(w))) {
                             LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Nope - All WorkTypes disabled for this dude");
@@ -349,8 +350,11 @@ namespace The1nk.WorkGroups {
                             }
                         }
 
-                        float thisPawnsSkill = 0f;
-                        int cnt = 0;
+                        var entry = new ScoreCardEntry() {Pawn = pawn};
+                        card.Entries.Add(entry);
+
+                        var thisPawnsSkill = 0f;
+                        var cnt = 0;
 
                         foreach (var wgItem in wg.Items) {
                             if (wgItem.relevantSkills.Any())
@@ -369,21 +373,46 @@ namespace The1nk.WorkGroups {
                             cnt++;
                         }
 
-                        thisPawnsSkill /= cnt;
+                        entry.Skill = thisPawnsSkill / cnt;
 
-                        foreach (var importantStat in wg.ImportantStats) {
-                            thisPawnsSkill *= pawn.Pawn.GetStatValue(importantStat);
+                        foreach (var importantStat in wg.HighStats) {
+                            entry.Stats.Add(new ScoreCardEntryStat() {
+                                Stat =  importantStat,
+                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                IsLowStat = false
+                            });
                         }
 
-                        if (!(thisPawnsSkill > averageSkill)) continue;
-                        bestPawn = pawn;
-                        averageSkill = thisPawnsSkill;
+                        foreach (var importantStat in wg.LowStats) {
+                            entry.Stats.Add(new ScoreCardEntryStat() {
+                                Stat =  importantStat,
+                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                IsLowStat = true
+                            });
+                        }
                     }
+
+                    card.CalculateFinalModifiers();
+                    bestPawn = card.Entries.OrderByDescending(e => e.FinalScore).FirstOrDefault()?.Pawn;
+
+                    var debug = new StringBuilder();
+                    foreach (var scoreCardEntry in card.Entries) {
+                        debug.AppendLine($"-{scoreCardEntry.Pawn.Pawn.Name}");
+                        debug.AppendLine($"--Skill: {scoreCardEntry.Skill}\tMod: {scoreCardEntry.FinalModifier}\tScore: {scoreCardEntry.FinalScore}");
+                        foreach (var scoreCardEntryStat in scoreCardEntry.Stats) {
+                            debug.AppendLine(
+                                $"---Stat: {scoreCardEntryStat.Stat.defName}\tVal: {scoreCardEntryStat.StatValue}\tLow: {scoreCardEntryStat.IsLowStat}");
+                        }
+                    }
+                    LogHelper.Verbose(debug.ToString());
 
                     if (bestPawn != null) {
                         LogHelper.Verbose($"-- {bestPawn.Pawn.Name.ToStringFull} - Yep");
                         (bestPawn.WorkGroups as List<WorkGroup>).Add(wg);
                         changedSomething = true;
+                    }
+                    else {
+                        LogHelper.Verbose("Ooops no-one available..");
                     }
                 }
             }
