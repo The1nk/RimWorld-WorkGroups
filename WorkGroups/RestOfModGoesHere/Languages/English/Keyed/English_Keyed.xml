@@ -30,7 +30,6 @@
   <gpPrisoners>Prisoners</gpPrisoners>
   <gpWhores>Whores</gpWhores>
 
-
   <!-- Group-level items -->
   <btnJobs>Jobs</btnJobs>
   <ttJobs>What Jobs this WorkGroup contains. All Jobs in a given WorkGroup will have the same Work Priority.</ttJobs>
@@ -67,5 +66,4 @@
   <CantHavesTip>Pawns who have any of the Traits in this list will not be selected for this WorkGroup</CantHavesTip>
   <AllTraits>All Traits</AllTraits>
   <AllTraitsTip>All Available Traits</AllTraitsTip>
-
 </LanguageData>
