@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using RimWorld;
 using The1nk.WorkGroups.Models;
 using Verse;
@@ -65,7 +66,6 @@ namespace The1nk.WorkGroups {
                 madeChanges = true;
             if (madeChanges) ApplyPriorities(ref pawns, _settings.SetPawnTitles);
         }
-
         private void Prep() {
             if (prepped)
                 return;
@@ -94,6 +94,7 @@ namespace The1nk.WorkGroups {
 
             _settings.AllWorkTypes = FetchWorkTypes(ref _settings.AllWorkTypes);
             _settings.AllStatDefs = FetchStatDefs(ref _settings.AllStatDefs);
+            _settings.AllTraits = FetchTraitDefs(ref _settings.AllTraits);
 
             if (!Current.Game.playSettings.useWorkPriorities) {
                 Current.Game.playSettings.useWorkPriorities = true;
@@ -129,19 +130,55 @@ namespace The1nk.WorkGroups {
                         LogHelper.Warning($"Found null ImportantStat on group '{wg.Name}', position {i + 1}. Removing..");
                         wg.ImportantStats.RemoveAt(i);
                         i--;
+                        continue;
                     }
                     else {
                         if (!_settings.AllStatDefs.Any(sdD => sdD == sd)) {
                             LogHelper.Warning($"ImportantStat on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
                             wg.Items.RemoveAt(i);
                             i--;
+                            continue;
                         }
                     }
+
+                    // Convert ImportantStats to HighStats
+                    if (wg.HighStats == null)
+                        wg.HighStats = new List<StatDef>();
+                    if (wg.LowStats == null)
+                        wg.LowStats = new List<StatDef>();
+                    if (wg.TraitsMustHave == null)
+                        wg.TraitsMustHave = new List<Trait>();
+                    if (wg.TraitsWantToHave == null)
+                        wg.TraitsWantToHave = new List<Trait>();
+                    if (wg.TraitsCantHave == null)
+                        wg.TraitsCantHave = new List<Trait>();
+
+                    wg.HighStats.Add(wg.ImportantStats[i]);
+                    wg.ImportantStats.RemoveAt(i);
+                    i--;
                 }
             }
 
             prepped = true;
             LogHelper.Verbose("-Prep()");
+        }
+
+        private IEnumerable<Trait> FetchTraitDefs(ref IEnumerable<Trait> allTraitDefs) {
+            if (allTraitDefs.Any())
+                return allTraitDefs;
+
+            var tdList = allTraitDefs as List<Trait>;
+
+            foreach (var td in DefDatabase<TraitDef>.AllDefs) {
+                foreach (var degree in td.degreeDatas) {
+                    tdList.Add(new Trait(td, degree.degree));
+                }
+            }
+
+            tdList.ForEach(t => LogHelper.Verbose($"--Found Trait defName = '{t.LabelCap}'"));
+
+            return tdList;
+
         }
 
         private IEnumerable<StatDef> FetchStatDefs(ref IEnumerable<StatDef> allStatDefs) {
@@ -153,7 +190,7 @@ namespace The1nk.WorkGroups {
             sdList.AddRange(DefDatabase<StatDef>.AllDefsListForReading.Where(d => !d.alwaysHide && d.showOnPawns)
                 .OrderBy(d => d.category.displayOrder).ThenBy(d => d.displayPriorityInCategory));
 
-            sdList.ForEach(d => LogHelper.Verbose($"--{d.LabelForFullStatListCap}, defName = '{d.defName}'"));
+            sdList.ForEach(d => LogHelper.Verbose($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
 
             return sdList;
         }
@@ -319,10 +356,35 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} Prisoners due to WorkGroup setting disabled");
                     }
 
-                    foreach (var pawn in filteredPawns) {
-                        if (pawn.Pawn.Downed || pawn.Pawn.Dead || pawn.Pawn.InMentalState)
-                            continue;
+                    filteredPawns = filteredPawns.Where(p =>
+                        !p.Pawn.Downed && !p.Pawn.Dead && !p.Pawn.InMentalState && p.Pawn.Spawned);
 
+                    foreach (var trait in wg.TraitsMustHave) {
+                        var newFiltered = filteredPawns.ToList();
+
+                        foreach (var p in filteredPawns.Where(p => !p.Pawn.story.traits.allTraits.Any(t => t.def == trait.def && t.Degree == trait.Degree))) {
+                            LogHelper.Verbose(
+                                $"Not considering pawn {p.Pawn.Name.ToStringShort} due to missing Must Have Trait {trait.LabelCap}");
+                            newFiltered.Remove(p);
+                        }
+
+                        filteredPawns = newFiltered;
+                    }
+
+                    foreach (var trait in wg.TraitsCantHave) {
+                        var newFiltered = filteredPawns.ToList();
+
+                        foreach (var p in filteredPawns.Where(p => p.Pawn.story.traits.allTraits.Any(t => t.def == trait.def && t.Degree == trait.Degree))) {
+                            LogHelper.Verbose(
+                                $"Not considering pawn {p.Pawn.Name.ToStringShort} due to having Can't Have Trait {trait.LabelCap}");
+                            newFiltered.Remove(p);
+                        }
+
+                        filteredPawns = newFiltered;
+                    }
+
+                    var card = new ScoreCard();
+                    foreach (var pawn in filteredPawns) {
                         var disabled = pawn.Pawn.GetDisabledWorkTypes();
                         if (wg.Items.All(w => disabled.Contains(w))) {
                             LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Nope - All WorkTypes disabled for this dude");
@@ -337,8 +399,19 @@ namespace The1nk.WorkGroups {
                             }
                         }
 
-                        float thisPawnsSkill = 0f;
-                        int cnt = 0;
+                        var entry = new ScoreCardEntry() {Pawn = pawn};
+                        card.Entries.Add(entry);
+
+                        foreach (var trait in wg.TraitsWantToHave) {
+                            if (pawn.Pawn.story.traits.allTraits.Any(
+                                t => t.def == trait.def && t.Degree == trait.Degree)) {
+                                entry.HasSomeWantedTraits = true;
+                                break;
+                            }
+                        }
+
+                        var thisPawnsSkill = 0f;
+                        var cnt = 0;
 
                         foreach (var wgItem in wg.Items) {
                             if (wgItem.relevantSkills.Any())
@@ -357,21 +430,48 @@ namespace The1nk.WorkGroups {
                             cnt++;
                         }
 
-                        thisPawnsSkill /= cnt;
+                        entry.Skill = thisPawnsSkill / cnt;
 
-                        foreach (var importantStat in wg.ImportantStats) {
-                            thisPawnsSkill *= pawn.Pawn.GetStatValue(importantStat);
+                        foreach (var importantStat in wg.HighStats) {
+                            entry.Stats.Add(new ScoreCardEntryStat() {
+                                Stat =  importantStat,
+                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                IsLowStat = false
+                            });
                         }
 
-                        if (!(thisPawnsSkill > averageSkill)) continue;
-                        bestPawn = pawn;
-                        averageSkill = thisPawnsSkill;
+                        foreach (var importantStat in wg.LowStats) {
+                            entry.Stats.Add(new ScoreCardEntryStat() {
+                                Stat =  importantStat,
+                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                IsLowStat = true
+                            });
+                        }
                     }
+
+                    card.CalculateFinalModifiers();
+                    // First get the pawn with 1+ of the wanted traits .. fall back to just anyone who's the best
+                    bestPawn = card.Entries.Where(e => e.HasSomeWantedTraits).OrderByDescending(e => e.FinalScore).FirstOrDefault()?.Pawn ??
+                               card.Entries.OrderByDescending(e => e.FinalScore).FirstOrDefault()?.Pawn;
+
+                    var debug = new StringBuilder();
+                    foreach (var scoreCardEntry in card.Entries) {
+                        debug.AppendLine($"-{scoreCardEntry.Pawn.Pawn.Name}");
+                        debug.AppendLine($"--Skill: {scoreCardEntry.Skill}\tMod: {scoreCardEntry.FinalModifier}\tScore: {scoreCardEntry.FinalScore}");
+                        foreach (var scoreCardEntryStat in scoreCardEntry.Stats) {
+                            debug.AppendLine(
+                                $"---Stat: {scoreCardEntryStat.Stat.defName}\tVal: {scoreCardEntryStat.StatValue}\tLow: {scoreCardEntryStat.IsLowStat}");
+                        }
+                    }
+                    LogHelper.Verbose(debug.ToString());
 
                     if (bestPawn != null) {
                         LogHelper.Verbose($"-- {bestPawn.Pawn.Name.ToStringFull} - Yep");
                         (bestPawn.WorkGroups as List<WorkGroup>).Add(wg);
                         changedSomething = true;
+                    }
+                    else {
+                        LogHelper.Verbose("Ooops no-one available..");
                     }
                 }
             }

@@ -56,11 +56,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogHelper.cs" />
+    <Compile Include="Models\ScoreCard.cs" />
     <Compile Include="Windows\MainTabWindow.cs" />
     <Compile Include="Models\PawnWithWorkgroups.cs" />
     <Compile Include="Models\UniqueId.cs" />
     <Compile Include="Models\WorkGroup.cs" />
     <Compile Include="Windows\RenameWindow.cs" />
+    <Compile Include="Windows\TraitsPicker.cs" />
+    <Compile Include="Windows\StatsPicker.cs" />
     <Compile Include="WorkGroupsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkGroupsMapComponent.cs" />
@@ -80,6 +83,7 @@
     <Content Include="RestOfModGoesHere\About\PublishedFileId.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="RestOfModGoesHere\Languages\ChineseSimplified\Keyed\ChineseSimplified_Keyed.xml" />
     <Content Include="RestOfModGoesHere\Languages\English\Keyed\English_Keyed.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

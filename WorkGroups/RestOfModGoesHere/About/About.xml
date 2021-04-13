@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>WorkGroups</name>
+	<name>WorkGroups | Automatic Job Role Assigner</name>
 	<author>The1nk</author>
 	<supportedVersions>
 		<li>1.2</li>
