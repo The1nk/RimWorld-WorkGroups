@@ -215,6 +215,7 @@ namespace The1nk.WorkGroups {
         private void ApplyPriorities(ref IEnumerable<PawnWithWorkgroups> pawns, bool setPawnTitles) {
             LogHelper.Verbose("+ApplyPriorities()");
             foreach (var pawn in pawns) {
+
                 if (pawn.Pawn.workSettings == null) {
                     LogHelper.Verbose($"--{pawn.Pawn.Name.ToStringShort} has null workSettings .. oops");
                     continue;
@@ -279,6 +280,8 @@ namespace The1nk.WorkGroups {
 
                 if (setPawnTitles)
                     pawn.Pawn.story.Title = string.Join(",", newTitle);
+
+                LogHelper.Verbose($"{pawn.Pawn.Name.ToStringShort} - {string.Join(",", newTitle)}");
 
                 // Force re-caching of workgivers
                 pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
