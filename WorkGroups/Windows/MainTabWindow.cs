@@ -141,6 +141,7 @@ namespace The1nk.WorkGroups.Windows
             txtRec.width = 40;
             if (Widgets.ButtonText(txtRec, "btnJobs".Translate())) {
                 Find.WindowStack.Add(new FloatMenu(GetWorkTypesList(group)));
+                WorkGroupsSettings.GetSettings.Component?.RunNow();
             }
 
             TooltipHandler.TipRegion(txtRec,
@@ -161,6 +162,11 @@ namespace The1nk.WorkGroups.Windows
             txtRec = new Rect(newLoc);
             txtRec.width = 40;
             if (Widgets.ButtonText(txtRec, "btnStats".Translate())) {
+                if (group.HighStats == null)
+                    group.HighStats = new List<StatDef>();
+                if (group.LowStats == null)
+                    group.LowStats = new List<StatDef>();
+
                 Find.WindowStack.Add(new StatsPicker(group.HighStats, group.LowStats));
             }
 

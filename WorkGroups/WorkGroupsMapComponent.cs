@@ -61,10 +61,11 @@ namespace The1nk.WorkGroups {
             if (_settings.PlInstalled && _settings.SetPrioritiesForPrisoners)
                 (pawns as List<PawnWithWorkgroups>).AddRange(FetchPrisoners());
             ClearWorkGroups(ref pawns);
-            var madeChanges = false;
-            while (UpdatePriorities(ref pawns))
-                madeChanges = true;
-            if (madeChanges) ApplyPriorities(ref pawns, _settings.SetPawnTitles);
+            while (true) {
+                if (!UpdatePriorities(ref pawns))
+                    break;
+            }
+            ApplyPriorities(ref pawns, _settings.SetPawnTitles);
         }
         private void Prep() {
             if (prepped)
@@ -177,7 +178,7 @@ namespace The1nk.WorkGroups {
 
             tdList.ForEach(t => LogHelper.Verbose($"--Found Trait defName = '{t.LabelCap}'"));
 
-            return tdList;
+            return tdList.OrderBy(t => t.LabelCap);
 
         }
 
@@ -224,47 +225,70 @@ namespace The1nk.WorkGroups {
 
                 var newTitle = new List<string>();
 
+                pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                pawn.Pawn.Notify_DisabledWorkTypesChanged();
+                pawn.Pawn.workSettings.EnableAndInitialize();
+                pawn.Pawn.workSettings.DisableAll();
+
                 if (_settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
                     foreach (var awt in _settings.AllWorkTypes) {
                         pawn.Pawn.workSettings.SetPriority(awt,
                             (awt.defName == "PatientBedRest" || awt.defName == "Patient") ? 1 : 0);
                     }
+
+                    newTitle.Add("Resting");
                 }
                 else {
+                    var interested = pawn.Pawn.Name.ToStringShort.Contains("Chayer");
+                    LogHelper.Verbose($"Is this Chayer? {interested}! It's {pawn.Pawn.Name.ToStringShort}");
+
+                    if (interested)
+                        LogHelper.Verbose($"Before:\r\n{pawn.Pawn.workSettings.DebugString()}");
+
                     var disabled = pawn.Pawn.GetDisabledWorkTypes();
-
-                    // Clear out no-longer-assigned works
-                    foreach (var wt in _settings.AllWorkTypes) {
-                        if (!pawn.WorkGroups.Any(g => g.Items.Contains(wt)))
-                            pawn.Pawn.workSettings.SetPriority(wt, 0);
-                    }
-
                     var seenTypes = new List<WorkTypeDef>();
-
                     int currentPriority = 0;
                     foreach (var wg in pawn.WorkGroups) {
                         currentPriority++;
 
                         currentPriority = Math.Min(currentPriority, _settings.MaxPriority);
+                        
+                        if (interested)
+                            LogHelper.Verbose($"Setting {wg.Name} as priority {currentPriority}");
+
                         foreach (var wgi in wg.Items) {
-                            if (seenTypes.Contains(wgi))
+                            if (seenTypes.Contains(wgi)) {
+                                LogHelper.Verbose($"Already seen {wgi.labelShort}, bailing out");
                                 continue; // Only set each WorkType priority *once*. First-come-first-serve!!
+                            }
 
                             if (!disabled.Contains(wgi)) {
+                                var was = pawn.Pawn.workSettings.GetPriority(wgi);
                                 pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
-                                pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
-                                var priorityAfter = pawn.Pawn.workSettings.GetPriority(wgi);
+                                var isNow = pawn.Pawn.workSettings.GetPriority(wgi);
 
-                                if (priorityAfter != currentPriority)
+
+                                if (interested)
+                                    LogHelper.Verbose($"Trying to set {wgi.labelShort} to {currentPriority:0} from {was:0}.. is now {isNow:0}");
+
+                                if (isNow != currentPriority)
                                     Log.Warning(
-                                        $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {priorityAfter}!");
+                                        $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {isNow:0}!");
                             }
+                            else {
+                                if (interested)
+                                    LogHelper.Verbose("Oop it disabled");
+                            }
+
                             seenTypes.Add(wgi);
                         }
 
                         if (!wg.DisableTitleForThisWorkGroup)
                             newTitle.Add(wg.Name);
-                    }    
+                    }
+
+                    if (interested)
+                        LogHelper.Verbose($"After:\r\n{pawn.Pawn.workSettings.DebugString()}");
                 }
 
                 if (_settings.ClearOutSchedules)
@@ -273,6 +297,12 @@ namespace The1nk.WorkGroups {
 
                 if (setPawnTitles)
                     pawn.Pawn.story.Title = string.Join(",", newTitle);
+
+                // Force re-caching of workgivers
+                pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                pawn.Pawn.Notify_DisabledWorkTypesChanged();
+                var tmp = pawn.Pawn.workSettings.WorkGiversInOrderEmergency;
+                var tmp2 = pawn.Pawn.workSettings.WorkGiversInOrderNormal;
             }
             LogHelper.Verbose("-ApplyPriorities()");
         }
