@@ -63,7 +63,7 @@
   <WantToHaves>优先</WantToHaves>
   <WantToHavesTip>含有该列表中任一特性的小人将优先编入小队</WantToHavesTip>
   <CantHaves>禁止</CantHaves>
-  <CantHavesTip>含有该列表中任一特性的小人进入编入小队</CantHavesTip>
+  <CantHavesTip>含有该列表中任一特性的小人禁止编入小队</CantHavesTip>
   <AllTraits>特性列表</AllTraits>
   <AllTraitsTip>所有可选特性</AllTraitsTip>
 </LanguageData>
