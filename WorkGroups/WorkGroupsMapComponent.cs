@@ -55,7 +55,7 @@ namespace The1nk.WorkGroups {
             if (!_settings.Enabled)
                 return;
 
-            LogHelper.Info($"Fired at {lastUpdateTick}. Next at {nextUpdateTick}.");
+            LogHelper.Info($"Firing at {lastUpdateTick}. Next at {nextUpdateTick}.");
 
             var pawns = FetchColonists();
             if (_settings.PlInstalled && _settings.SetPrioritiesForPrisoners)
@@ -66,6 +66,8 @@ namespace The1nk.WorkGroups {
                     break;
             }
             ApplyPriorities(ref pawns, _settings.SetPawnTitles);
+
+            LogHelper.Info($"Done!");
         }
         private void Prep() {
             if (prepped)
