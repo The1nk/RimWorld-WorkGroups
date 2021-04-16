@@ -241,12 +241,6 @@ namespace The1nk.WorkGroups {
                     newTitle.Add("Resting");
                 }
                 else {
-                    var interested = pawn.Pawn.Name.ToStringShort.Contains("Chayer");
-                    LogHelper.Verbose($"Is this Chayer? {interested}! It's {pawn.Pawn.Name.ToStringShort}");
-
-                    if (interested)
-                        LogHelper.Verbose($"Before:\r\n{pawn.Pawn.workSettings.DebugString()}");
-
                     var disabled = pawn.Pawn.GetDisabledWorkTypes();
                     var seenTypes = new List<WorkTypeDef>();
                     int currentPriority = 0;
@@ -255,9 +249,6 @@ namespace The1nk.WorkGroups {
 
                         currentPriority = Math.Min(currentPriority, _settings.MaxPriority);
                         
-                        if (interested)
-                            LogHelper.Verbose($"Setting {wg.Name} as priority {currentPriority}");
-
                         foreach (var wgi in wg.Items) {
                             if (seenTypes.Contains(wgi)) {
                                 LogHelper.Verbose($"Already seen {wgi.labelShort}, bailing out");
@@ -269,17 +260,9 @@ namespace The1nk.WorkGroups {
                                 pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
                                 var isNow = pawn.Pawn.workSettings.GetPriority(wgi);
 
-
-                                if (interested)
-                                    LogHelper.Verbose($"Trying to set {wgi.labelShort} to {currentPriority:0} from {was:0}.. is now {isNow:0}");
-
                                 if (isNow != currentPriority)
                                     Log.Warning(
                                         $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {isNow:0}!");
-                            }
-                            else {
-                                if (interested)
-                                    LogHelper.Verbose("Oop it disabled");
                             }
 
                             seenTypes.Add(wgi);
@@ -288,9 +271,6 @@ namespace The1nk.WorkGroups {
                         if (!wg.DisableTitleForThisWorkGroup)
                             newTitle.Add(wg.Name);
                     }
-
-                    if (interested)
-                        LogHelper.Verbose($"After:\r\n{pawn.Pawn.workSettings.DebugString()}");
                 }
 
                 if (_settings.ClearOutSchedules)
@@ -328,22 +308,10 @@ namespace The1nk.WorkGroups {
                 if (wg.TargetQuantity < 1)
                     wg.TargetQuantity = 1;
 
-                if (wg.AssignToEveryone)
-                {
-                    LogHelper.Verbose($"- {wg.Name} - for everyone..");
-                    foreach (var pawn in pawns.Where(p => !p.WorkGroups.Contains(wg))) {
-                        LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Yep");
-                        (pawn.WorkGroups as List<WorkGroup>).Add(wg);
-                        changedSomething = true;
-                    }
-
-                    continue;
-                }
-
                 for (int i = 0; i < wg.TargetQuantity; i++) {
                     PawnWithWorkgroups bestPawn = null;
                     float averageSkill = -1f;
-                    LogHelper.Verbose($"- Looking for a {wg.Name}..");
+                    LogHelper.Verbose($"- Looking for a {wg.Name}.. " + (wg.AssignToEveryone ? " everyone!" : ""));
 
                     var filteredPawns = pawns.Where(p => !p.WorkGroups.Contains(wg));
                     if (_settings.ForcedBedRestForInjuredPawns) {
@@ -354,6 +322,19 @@ namespace The1nk.WorkGroups {
                         if (before != after)
                             LogHelper.Verbose(
                                 $"Filtered out {before - after} pawns due to recovering and ForcedBedRestForInjuredPawns");
+                    }
+
+                    if (!wg.ColonistsAllowed) {
+                        var before = filteredPawns.Count();
+                        filteredPawns = filteredPawns.Where(p =>
+                            !p.IsColonist || // Not a colonist .. or 
+                            (p.IsColonist && _settings.SsInstalled && p.IsSlave) || // A colonist, but is also a slave
+                            (p.IsColonist && _settings.PlInstalled && p.IsPrisoner)); // A colonist, but also a prisoner
+                        var after = filteredPawns.Count();
+
+                        if (before != after)
+                            LogHelper.Verbose(
+                                $"Filtered out {before - after} colonists (not slave colonists or prisoner colonists) due to WorkGroup setting disabled");
                     }
 
                     if (!_settings.SsInstalled ||
@@ -390,6 +371,15 @@ namespace The1nk.WorkGroups {
 
                     filteredPawns = filteredPawns.Where(p =>
                         !p.Pawn.Downed && !p.Pawn.Dead && !p.Pawn.InMentalState && p.Pawn.Spawned);
+
+                    if (wg.AssignToEveryone) {
+                        foreach (var pawn in filteredPawns) {
+                            LogHelper.Verbose($"-- {pawn.Pawn.Name.ToStringFull} - Yep");
+                            (pawn.WorkGroups as List<WorkGroup>).Add(wg);
+                        }
+
+                        break;
+                    }
 
                     foreach (var trait in wg.TraitsMustHave) {
                         var newFiltered = filteredPawns.ToList();
@@ -495,7 +485,8 @@ namespace The1nk.WorkGroups {
                                 $"---Stat: {scoreCardEntryStat.Stat.defName}\tVal: {scoreCardEntryStat.StatValue}\tLow: {scoreCardEntryStat.IsLowStat}");
                         }
                     }
-                    LogHelper.Verbose(debug.ToString());
+
+                    LogHelper.Verbose($"Scores:\r\n{debug}");
 
                     if (bestPawn != null) {
                         LogHelper.Verbose($"-- {bestPawn.Pawn.Name.ToStringFull} - Yep");
