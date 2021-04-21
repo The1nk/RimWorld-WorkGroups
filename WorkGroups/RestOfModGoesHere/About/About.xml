@@ -7,4 +7,11 @@
 	</supportedVersions>
 	<packageId>The1nk.WorkGroups</packageId>
 	<description>WorkGroups!</description>
+  <modDependencies>
+    <li>
+      <packageId>UnlimitedHugs.HugsLib</packageId>
+      <displayName>HugsLib</displayName>
+      <steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=818773962</steamWorkshopUrl>
+    </li>
+  </modDependencies>
 </ModMetaData>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using HugsLib;
 using RimWorld;
 using The1nk.WorkGroups.Models;
 using Verse;
@@ -19,12 +20,9 @@ namespace The1nk.WorkGroups {
         private long lastUpdateTick = 0;
         private long nextUpdateTick = 0;
         private bool prepped = false;
-        
 
         public WorkGroupsMapComponent(Map map) : base(map) {
-            var crp = new WorkGroupsSettings();
             _settings = WorkGroupsSettings.GetSettings;
-            _settings.Component = this;
         }
 
         public override void ExposeData() {
@@ -170,7 +168,7 @@ namespace The1nk.WorkGroups {
             if (allTraitDefs.Any())
                 return allTraitDefs;
 
-            var tdList = allTraitDefs as List<Trait>;
+            var tdList = allTraitDefs as List<Trait> ?? new List<Trait>();
 
             foreach (var td in DefDatabase<TraitDef>.AllDefs) {
                 foreach (var degree in td.degreeDatas) {
@@ -178,9 +176,11 @@ namespace The1nk.WorkGroups {
                 }
             }
 
+            tdList = tdList.OrderBy(t => t.CurrentData.label).ToList();
+
             tdList.ForEach(t => LogHelper.Verbose($"--Found Trait defName = '{t.LabelCap}'"));
 
-            return tdList.OrderBy(t => t.LabelCap);
+            return tdList;
 
         }
 
@@ -373,7 +373,7 @@ namespace The1nk.WorkGroups {
                     }
 
                     filteredPawns = filteredPawns.Where(p =>
-                        !p.Pawn.Downed && !p.Pawn.Dead && !p.Pawn.InMentalState && p.Pawn.Spawned);
+                        !p.Pawn.Downed && !p.Pawn.Dead && !p.Pawn.InMentalState);
 
                     if (wg.AssignToEveryone) {
                         foreach (var pawn in filteredPawns) {
@@ -510,7 +510,7 @@ namespace The1nk.WorkGroups {
             LogHelper.Verbose("+FetchPawns()");
             var ret = new List<PawnWithWorkgroups>();
 
-            ret.AddRange(map.mapPawns.FreeColonistsSpawned.Select(p => new PawnWithWorkgroups(p)));
+            ret.AddRange(map.mapPawns.FreeColonists.Select(p => new PawnWithWorkgroups(p)));
 
             if (_settings.SsInstalled && !_settings.SetPrioritiesForSlaves) {
                 var before = ret.Count();
@@ -538,7 +538,7 @@ namespace The1nk.WorkGroups {
             LogHelper.Verbose("+FetchPrisoners()");
             var ret = new List<PawnWithWorkgroups>();
 
-            ret.AddRange(map.mapPawns.PrisonersOfColonySpawned.Select(p => new PawnWithWorkgroups(p)));
+            ret.AddRange(map.mapPawns.PrisonersOfColony.Select(p => new PawnWithWorkgroups(p)));
 
             if (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers) {
                 var before = ret.Count();

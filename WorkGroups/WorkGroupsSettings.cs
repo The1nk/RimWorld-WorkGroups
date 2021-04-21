@@ -9,7 +9,16 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsSettings : IExposable {
-        public static WorkGroupsSettings GetSettings { get; private set; }
+        public static WorkGroupsSettings GetSettings {
+            get {
+                if (_instance == null)
+                    _instance = new WorkGroupsSettings();
+
+                return _instance;
+            }
+        }
+
+        private static WorkGroupsSettings _instance;
 
         private bool _ssInstalled;
         private bool _plInstalled;
@@ -69,7 +78,6 @@ namespace The1nk.WorkGroups {
 
         public WorkGroupsSettings() {
             WorkGroups = new List<WorkGroup>();
-            GetSettings = this;
         }
 
         public void ExposeData() {
