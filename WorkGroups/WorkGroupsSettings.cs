@@ -9,15 +9,6 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsSettings : IExposable {
-        public static WorkGroupsSettings GetSettings {
-            get {
-                if (_instance == null)
-                    _instance = new WorkGroupsSettings();
-
-                return _instance;
-            }
-        }
-
         private static WorkGroupsSettings _instance;
 
         private bool _ssInstalled;
@@ -53,6 +44,8 @@ namespace The1nk.WorkGroups {
                 _rjwInstalled = value;
             }
         }
+
+        public static bool Prepped = false;
 
         public WorkGroupsMapComponent Component { get; set; }
         public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
@@ -276,7 +269,7 @@ namespace The1nk.WorkGroups {
 
                 switch (mode) {
                     case 1:
-                        var wt = GetSettings.AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
+                        var wt = GetSettings().AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
                         if (wt != null)
                             grp.Items.Add(wt);
                         break;
@@ -286,7 +279,7 @@ namespace The1nk.WorkGroups {
                         break;
 
                     case 3:
-                        var sd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        var sd = GetSettings().AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
                         if (sd != null)
                             grp.HighStats.Add(sd); // ImportantStats turn into HighStats
                         break;
@@ -305,7 +298,10 @@ namespace The1nk.WorkGroups {
                 ColonistsAllowed = bool.Parse(lines[3]),
                 SlavesAllowed = bool.Parse(lines[4]),
                 PrisonersAllowed = bool.Parse(lines[5]),
-                RjwWorkersAllowed = bool.Parse(lines[6])
+                RjwWorkersAllowed = bool.Parse(lines[6]),
+                TraitsMustHave = new List<Trait>(),
+                TraitsWantToHave = new List<Trait>(),
+                TraitsCantHave = new List<Trait>()
             };
 
             var mode = 1;
@@ -317,7 +313,7 @@ namespace The1nk.WorkGroups {
 
                 switch (mode) {
                     case 1:
-                        var wt = GetSettings.AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
+                        var wt = GetSettings().AllWorkTypes.FirstOrDefault(t => t.defName == lines[i]);
                         if (wt != null)
                             grp.Items.Add(wt);
                         break;
@@ -327,13 +323,13 @@ namespace The1nk.WorkGroups {
                         break;
 
                     case 3:
-                        var sd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        var sd = GetSettings().AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
                         if (sd != null)
                             grp.HighStats.Add(sd);
                         break;
 
                     case 4:
-                        var sdd = GetSettings.AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
+                        var sdd = GetSettings().AllStatDefs.FirstOrDefault(s => s.defName == lines[i]);
                         if (sdd != null)
                             grp.LowStats.Add(sdd);
                         break;
@@ -371,6 +367,15 @@ namespace The1nk.WorkGroups {
             }
 
             return grp;
+        }
+
+
+        public static WorkGroupsSettings GetSettings() {
+            return _instance;
+        }
+
+        public static void SetSettings(WorkGroupsSettings settings) {
+            _instance = settings;
         }
     }
 }

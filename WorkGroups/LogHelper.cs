@@ -27,38 +27,36 @@ namespace The1nk.WorkGroups
         }
 
         public static void Verbose(string message) {
-            _logger?.Message(message);
-            if (!WorkGroupsSettings.GetSettings.VerboseLogging)
+            if (!WorkGroupsSettings.GetSettings().VerboseLogging)
                 return;
 
-            _sw?.WriteLine("Verbose\t" + message);
+            message = "Verbose\t" + message;
+            _logger?.Message(message);
+            _sw?.WriteLine(message);
             _sw?.Flush();
         }
         
         public static void Info(string message) {
-            _logger?.Message(message);
-            if (!WorkGroupsSettings.GetSettings.VerboseLogging)
-                return;
+            message = "Info\t" + message;
 
-            _sw?.WriteLine("Info\t" + message);
+            _logger?.Message(message);
+            _sw?.WriteLine(message);
             _sw?.Flush();
         }
 
         public static void Warning(string message) {
+            message = "Warn\t" + message;
+            
             _logger?.Warning(message);
-            if (!WorkGroupsSettings.GetSettings.VerboseLogging)
-                return;
-
-            _sw?.WriteLine("Warn\t" + message);
+            _sw?.WriteLine(message);
             _sw?.Flush();
         }
 
         public static void Error(string message) {
-            _logger?.Error(message);
-            if (!WorkGroupsSettings.GetSettings.VerboseLogging)
-                return;
+            message = "Error\t" + message;
 
-            _sw?.WriteLine("Error\t" + message);
+            _logger?.Error(message);
+            _sw?.WriteLine(message);
             _sw?.Flush();
         }
     }

@@ -46,7 +46,7 @@ namespace The1nk.WorkGroups.Windows {
         }
 
         private void RefreshAllTraits() {
-            _allTraits = WorkGroupsSettings.GetSettings.AllTraits
+            _allTraits = WorkGroupsSettings.GetSettings().AllTraits
                 .Where(t => !_mustHave.Contains(t) && !_wantToHave.Contains(t) && !_cantHave.Contains(t)).ToList();
         }
 

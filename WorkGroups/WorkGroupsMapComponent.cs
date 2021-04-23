@@ -10,9 +10,6 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsMapComponent : MapComponent {
-        
-        private WorkGroupsSettings _settings;
-
         public static HediffDef SlaveHediff;
         public static MethodInfo RjwMethod;
         public static MethodInfo PlMethod;
@@ -21,13 +18,16 @@ namespace The1nk.WorkGroups {
         private long nextUpdateTick = 0;
         private bool prepped = false;
 
+        public WorkGroupsSettings Settings;
+
         public WorkGroupsMapComponent(Map map) : base(map) {
-            _settings = WorkGroupsSettings.GetSettings;
+            Settings = new WorkGroupsSettings();
+            WorkGroupsSettings.SetSettings(Settings);
         }
 
         public override void ExposeData() {
             base.ExposeData();
-            Scribe_Deep.Look(ref _settings, "WorkGroupsSettings", null);
+            Scribe_Deep.Look(ref Settings, "WorkGroupsSettings", null);
         }
 
         public override void MapComponentTick() {
@@ -44,26 +44,26 @@ namespace The1nk.WorkGroups {
                 return;
 
             lastUpdateTick = thisTick;
-            nextUpdateTick = thisTick + (_settings.HoursUpdateInterval * 2500); // 2500 ticks per in-game hour
+            nextUpdateTick = thisTick + (Settings.HoursUpdateInterval * 2500); // 2500 ticks per in-game hour
          
             RunNow();
         }
 
         public void RunNow() {
-            if (!_settings.Enabled)
+            if (!Settings.Enabled)
                 return;
 
             LogHelper.Info($"Firing at {lastUpdateTick}. Next at {nextUpdateTick}.");
 
             var pawns = FetchColonists();
-            if (_settings.PlInstalled && _settings.SetPrioritiesForPrisoners)
+            if (Settings.PlInstalled && Settings.SetPrioritiesForPrisoners)
                 (pawns as List<PawnWithWorkgroups>).AddRange(FetchPrisoners());
             ClearWorkGroups(ref pawns);
             while (true) {
                 if (!UpdatePriorities(ref pawns))
                     break;
             }
-            ApplyPriorities(ref pawns, _settings.SetPawnTitles);
+            ApplyPriorities(ref pawns, Settings.SetPawnTitles);
 
             LogHelper.Info($"Done!");
         }
@@ -73,29 +73,29 @@ namespace The1nk.WorkGroups {
 
             LogHelper.Verbose("+Prep()");
 
-            if (_settings.WorkGroups == null)
-                _settings.WorkGroups = new List<WorkGroup>();
+            if (Settings.WorkGroups == null)
+                Settings.WorkGroups = new List<WorkGroup>();
 
             SlaveHediff = DefDatabase<HediffDef>.GetNamedSilentFail("Enslaved");
             LogHelper.Verbose("SS Type found? " + (SlaveHediff != null));
-            _settings.SsInstalled = SlaveHediff != null;
+            Settings.SsInstalled = SlaveHediff != null;
             
             var rjwType = GenTypes.GetTypeInAnyAssembly("rjw.xxx", "rjw");
             LogHelper.Verbose("RJW Type found? " + (rjwType != null));
             if (rjwType != null)
                 RjwMethod = rjwType.GetMethod("is_whore");
 
-            _settings.RjwInstalled = RjwMethod != null;
+            Settings.RjwInstalled = RjwMethod != null;
 
             var plType = GenTypes.GetTypeInAnyAssembly("PrisonLabor.Core.PrisonLaborUtility", "PrisonLabor.Core");
             LogHelper.Verbose("Prison Labor Type found? " + (plType != null));
             if (plType != null)
                 PlMethod = plType.GetMethod("LaborEnabled");
-            _settings.PlInstalled = PlMethod != null;
+            Settings.PlInstalled = PlMethod != null;
 
-            _settings.AllWorkTypes = FetchWorkTypes(ref _settings.AllWorkTypes);
-            _settings.AllStatDefs = FetchStatDefs(ref _settings.AllStatDefs);
-            _settings.AllTraits = FetchTraitDefs(ref _settings.AllTraits);
+            Settings.AllWorkTypes = FetchWorkTypes(ref Settings.AllWorkTypes);
+            Settings.AllStatDefs = FetchStatDefs(ref Settings.AllStatDefs);
+            Settings.AllTraits = FetchTraitDefs(ref Settings.AllTraits);
 
             if (!Current.Game.playSettings.useWorkPriorities) {
                 Current.Game.playSettings.useWorkPriorities = true;
@@ -105,7 +105,7 @@ namespace The1nk.WorkGroups {
                 }
             }
 
-            foreach (var wg in _settings.WorkGroups) {
+            foreach (var wg in Settings.WorkGroups) {
                 if (wg.ImportantStats == null)
                     wg.ImportantStats = new List<StatDef>(); // Upgrade from 1.0 to 1.1
 
@@ -117,7 +117,7 @@ namespace The1nk.WorkGroups {
                         i--;
                     }
                     else {
-                        if (!_settings.AllWorkTypes.Any(wtD => wtD == wt)) {
+                        if (!Settings.AllWorkTypes.Any(wtD => wtD == wt)) {
                             LogHelper.Warning($"Work type on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
                             wg.Items.RemoveAt(i);
                             i--;
@@ -134,7 +134,7 @@ namespace The1nk.WorkGroups {
                         continue;
                     }
                     else {
-                        if (!_settings.AllStatDefs.Any(sdD => sdD == sd)) {
+                        if (!Settings.AllStatDefs.Any(sdD => sdD == sd)) {
                             LogHelper.Warning($"ImportantStat on group '{wg.Name}', position {i + 1}, missing from database. Removing..");
                             wg.Items.RemoveAt(i);
                             i--;
@@ -161,6 +161,7 @@ namespace The1nk.WorkGroups {
             }
 
             prepped = true;
+            WorkGroupsSettings.Prepped = true;
             LogHelper.Verbose("-Prep()");
         }
 
@@ -233,8 +234,8 @@ namespace The1nk.WorkGroups {
                 pawn.Pawn.workSettings.EnableAndInitialize();
                 pawn.Pawn.workSettings.DisableAll();
 
-                if (_settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
-                    foreach (var awt in _settings.AllWorkTypes) {
+                if (Settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
+                    foreach (var awt in Settings.AllWorkTypes) {
                         pawn.Pawn.workSettings.SetPriority(awt,
                             (awt.defName == "PatientBedRest" || awt.defName == "Patient") ? 1 : 0);
                     }
@@ -248,7 +249,7 @@ namespace The1nk.WorkGroups {
                     foreach (var wg in pawn.WorkGroups) {
                         currentPriority++;
 
-                        currentPriority = Math.Min(currentPriority, _settings.MaxPriority);
+                        currentPriority = Math.Min(currentPriority, Settings.MaxPriority);
                         
                         foreach (var wgi in wg.Items) {
                             if (seenTypes.Contains(wgi)) {
@@ -274,7 +275,7 @@ namespace The1nk.WorkGroups {
                     }
                 }
 
-                if (_settings.ClearOutSchedules)
+                if (Settings.ClearOutSchedules)
                     for (int i = 0; i < 24; i++)
                         pawn.Pawn.timetable.SetAssignment(i, TimeAssignmentDefOf.Anything);
 
@@ -297,7 +298,7 @@ namespace The1nk.WorkGroups {
             foreach (var pawn in pawns) {
                 pawn.WorkGroups = new List<WorkGroup>();
                 
-                if (_settings.SetPawnTitles)
+                if (Settings.SetPawnTitles)
                     pawn.Pawn.story.Title = string.Empty;
             }
             LogHelper.Verbose("-ClearWorkGroups()");
@@ -307,7 +308,7 @@ namespace The1nk.WorkGroups {
             LogHelper.Verbose("+UpdatePriorities()");
             var changedSomething = false;
 
-            foreach (var wg in _settings.WorkGroups) {
+            foreach (var wg in Settings.WorkGroups) {
                 if (wg.TargetQuantity < 1)
                     wg.TargetQuantity = 1;
 
@@ -317,7 +318,7 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"- Looking for a {wg.Name}.. " + (wg.AssignToEveryone ? " everyone!" : ""));
 
                     var filteredPawns = pawns.Where(p => !p.WorkGroups.Contains(wg));
-                    if (_settings.ForcedBedRestForInjuredPawns) {
+                    if (Settings.ForcedBedRestForInjuredPawns) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !HealthAIUtility.ShouldSeekMedicalRest(p.Pawn));
                         var after = filteredPawns.Count();
@@ -331,8 +332,8 @@ namespace The1nk.WorkGroups {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p =>
                             !p.IsColonist || // Not a colonist .. or 
-                            (p.IsColonist && _settings.SsInstalled && p.IsSlave) || // A colonist, but is also a slave
-                            (p.IsColonist && _settings.PlInstalled && p.IsPrisoner)); // A colonist, but also a prisoner
+                            (p.IsColonist && Settings.SsInstalled && p.IsSlave) || // A colonist, but is also a slave
+                            (p.IsColonist && Settings.PlInstalled && p.IsPrisoner)); // A colonist, but also a prisoner
                         var after = filteredPawns.Count();
 
                         if (before != after)
@@ -340,8 +341,8 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} colonists (not slave colonists or prisoner colonists) due to WorkGroup setting disabled");
                     }
 
-                    if (!_settings.SsInstalled ||
-                        (_settings.SsInstalled && !wg.SlavesAllowed)) {
+                    if (!Settings.SsInstalled ||
+                        (Settings.SsInstalled && !wg.SlavesAllowed)) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !p.IsSlave);
                         var after = filteredPawns.Count();
@@ -351,7 +352,7 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} slaves due to WorkGroup setting disabled");
                     }
 
-                    if (_settings.RjwInstalled && !wg.RjwWorkersAllowed) {
+                    if (Settings.RjwInstalled && !wg.RjwWorkersAllowed) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !p.IsRjwWorker);
                         var after = filteredPawns.Count();
@@ -361,8 +362,8 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} RJW Workers due to WorkGroup setting disabled");
                     }
 
-                    if (!_settings.PlInstalled ||
-                        (_settings.PlInstalled && !wg.PrisonersAllowed)) {
+                    if (!Settings.PlInstalled ||
+                        (Settings.PlInstalled && !wg.PrisonersAllowed)) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !p.IsPrisoner);
                         var after = filteredPawns.Count();
@@ -444,7 +445,7 @@ namespace The1nk.WorkGroups {
                                     var multiplier = 1f;
                                     var pawnSkill = pawn.Pawn.skills.GetSkill(skill);
 
-                                    if (_settings.UseLearningRates)
+                                    if (Settings.UseLearningRates)
                                         multiplier = pawnSkill.LearnRateFactor();
 
                                     thisPawnsSkill += multiplier * (pawnSkill.Level + 1); // This stupid +1 insures that if a pawn's level is 0, their stats still matter in the ImportantStats section below
@@ -512,7 +513,7 @@ namespace The1nk.WorkGroups {
 
             ret.AddRange(map.mapPawns.FreeColonists.Select(p => new PawnWithWorkgroups(p)));
 
-            if (_settings.SsInstalled && !_settings.SetPrioritiesForSlaves) {
+            if (Settings.SsInstalled && !Settings.SetPrioritiesForSlaves) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsSlave);
                 var after = ret.Count();
@@ -521,7 +522,7 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"Filtered out {before - after} slaves due to global setting disabled");
             }
 
-            if (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers) {
+            if (Settings.RjwInstalled && !Settings.SetPrioritiesForRjwWorkers) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsRjwWorker);
                 var after = ret.Count();
@@ -540,7 +541,7 @@ namespace The1nk.WorkGroups {
 
             ret.AddRange(map.mapPawns.PrisonersOfColony.Select(p => new PawnWithWorkgroups(p)));
 
-            if (_settings.RjwInstalled && !_settings.SetPrioritiesForRjwWorkers) {
+            if (Settings.RjwInstalled && !Settings.SetPrioritiesForRjwWorkers) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsRjwWorker);
                 var after = ret.Count();
@@ -549,7 +550,7 @@ namespace The1nk.WorkGroups {
                     LogHelper.Verbose($"Filtered out {before - after} (Prisoner) RJW Workers due to global setting disabled");
             }
 
-            if (!_settings.PlInstalled) {
+            if (!Settings.PlInstalled) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsPrisoner);
                 var after = ret.Count();

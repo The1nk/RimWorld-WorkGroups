@@ -36,7 +36,7 @@ namespace The1nk.WorkGroups.Windows
         }
 
         private void RefreshAllStats() {
-            _allStats = WorkGroupsSettings.GetSettings.AllStatDefs
+            _allStats = WorkGroupsSettings.GetSettings().AllStatDefs
                 .Where(s => !_highStats.Contains(s) && !_lowStats.Contains(s)).OrderBy(s => s.LabelForFullStatListCap)
                 .ToList();
         }
