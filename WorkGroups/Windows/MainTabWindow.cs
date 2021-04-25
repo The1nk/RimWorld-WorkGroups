@@ -22,11 +22,6 @@ namespace The1nk.WorkGroups.Windows
 
         public override void DoWindowContents(UnityEngine.Rect inRect) {
             base.DoWindowContents(inRect);
-            if (!WorkGroupsSettings.Prepped) {
-                LogHelper.Verbose("Not prepped. Bailing");
-                return;
-            }
-
             string buffer = _settings.HoursUpdateInterval.ToString("0");
             string buffer2 = _settings.MaxPriority.ToString("0");
 
@@ -280,10 +275,6 @@ namespace The1nk.WorkGroups.Windows
 
         public override void PreOpen() {
             _settings = Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings;
-
-            LogHelper.Info($"{_settings.AllWorkTypes.Count()} work types");
-            LogHelper.Info($"{_settings.AllStatDefs.Count()} stat defs");
-            LogHelper.Info($"{_settings.AllTraits.Count()} traits");
 
             base.PreOpen();
         }

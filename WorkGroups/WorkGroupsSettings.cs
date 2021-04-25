@@ -45,8 +45,6 @@ namespace The1nk.WorkGroups {
             }
         }
 
-        public static bool Prepped = false;
-
         public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
         public IEnumerable<Trait> AllTraits = new List<Trait>();

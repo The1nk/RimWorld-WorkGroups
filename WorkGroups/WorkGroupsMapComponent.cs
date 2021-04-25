@@ -16,14 +16,12 @@ namespace The1nk.WorkGroups {
 
         private long lastUpdateTick = 0;
         private long nextUpdateTick = 0;
-        private bool prepped = false;
 
         public WorkGroupsSettings Settings;
 
         public WorkGroupsMapComponent(Map map) : base(map) {
             Settings = new WorkGroupsSettings();
-            WorkGroupsSettings.SetSettings(Settings);
-            LogHelper.Info("WorkGroupsMapComponent.Ctor");
+            WorkGroupsSettings.SetSettings(Settings); // Needed for open game -> new map
             Prep();
         }
 
@@ -31,10 +29,8 @@ namespace The1nk.WorkGroups {
             base.ExposeData();
             Scribe_Deep.Look(ref Settings, "WorkGroupsSettings", null);
 
-            if (Scribe.mode == LoadSaveMode.PostLoadInit) {
-                LogHelper.Info("WorkGroupsMapComponent.ExposeData - PostLoadInit");
-                Prep();
-            }
+            WorkGroupsSettings.SetSettings(Settings); // Needed for open game -> load save
+            Prep();
         }
 
         public override void MapComponentTick() {
@@ -49,13 +45,17 @@ namespace The1nk.WorkGroups {
             if (nextUpdateTick > thisTick)
                 return;
 
-            lastUpdateTick = thisTick;
-            nextUpdateTick = thisTick + (Settings.HoursUpdateInterval * 2500); // 2500 ticks per in-game hour
-         
             RunNow();
         }
 
         public void RunNow() {
+            Settings = WorkGroupsSettings.GetSettings();
+
+            var thisTick = GenTicks.TicksGame;
+
+            lastUpdateTick = thisTick;
+            nextUpdateTick = thisTick + (Settings.HoursUpdateInterval * 2500); // 2500 ticks per in-game hour
+
             if (!Settings.Enabled)
                 return;
 
@@ -75,9 +75,6 @@ namespace The1nk.WorkGroups {
         }
 
         private void Prep() {
-            if (prepped)
-                return;
-
             LogHelper.Verbose("+Prep()");
 
             if (Settings.WorkGroups == null)
@@ -167,8 +164,6 @@ namespace The1nk.WorkGroups {
                 }
             }
 
-            prepped = true;
-            WorkGroupsSettings.Prepped = true;
             LogHelper.Verbose("-Prep()");
         }
 
@@ -238,10 +233,16 @@ namespace The1nk.WorkGroups {
                 pawn.Pawn.workSettings.EnableAndInitialize();
                 pawn.Pawn.workSettings.DisableAll();
 
+                Settings = WorkGroupsSettings.GetSettings();
+
                 if (Settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
-                    foreach (var awt in Settings.AllWorkTypes) {
-                        pawn.Pawn.workSettings.SetPriority(awt,
-                            (awt.defName == "PatientBedRest" || awt.defName == "Patient") ? 1 : 0);
+                    foreach (var awt in WorkGroupsSettings.GetSettings().AllWorkTypes) {
+                        int priority = 0;
+
+                        if (awt.defName == "PatientBedRest" || awt.defName == "Patient")
+                            priority = 1;
+
+                        pawn.Pawn.workSettings.SetPriority(awt, priority);
                     }
 
                     newTitle.Add("Resting");
