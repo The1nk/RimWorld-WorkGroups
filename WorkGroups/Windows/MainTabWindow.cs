@@ -274,23 +274,17 @@ namespace The1nk.WorkGroups.Windows
         }
 
         public override void PostClose() {
-            LogHelper.Info(
-                $"MainTabWindow _settings ref == MapComponent Settings ref? {ReferenceEquals(_settings, Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings)}");
-            LogHelper.Info($"==? {_settings == Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings}");
-            LogHelper.Info($"{_settings.WorkGroups.Count} workgroups in _settings, {Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings.WorkGroups.Count} in map component's settings");
-            
             Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().RunNow();
-            foreach (var c in Find.CurrentMap.components) {
-                if (c is WorkGroupsMapComponent) {
-                    LogHelper.Info("WorkGroupsMapComponent Found!");
-                }
-            }
-
             base.PostClose();
         }
 
         public override void PreOpen() {
             _settings = Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings;
+
+            LogHelper.Info($"{_settings.AllWorkTypes.Count()} work types");
+            LogHelper.Info($"{_settings.AllStatDefs.Count()} stat defs");
+            LogHelper.Info($"{_settings.AllTraits.Count()} traits");
+
             base.PreOpen();
         }
 
@@ -304,7 +298,7 @@ namespace The1nk.WorkGroups.Windows
             ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
 
             // Disabled ones
-            ret.AddRange(_settings.AllWorkTypes
+            ret.AddRange(WorkGroupsSettings.GetSettings().AllWorkTypes
                 .Where(wt => wt.visible && !group.Items.Contains(wt)).OrderByDescending(wt => wt.naturalPriority)
                 .Select(wt => new FloatMenuOption($"ddDisabled".Translate(wt.labelShort), () => group.Items.Add(wt))));
 
@@ -326,25 +320,6 @@ namespace The1nk.WorkGroups.Windows
                 .OrderBy(g => g)
                 .Select(g => new FloatMenuOption($"ddDisabled".Translate(g), () => group.CanBeAssignedWith.Add(g))));
 
-            return ret;
-        }
-
-        private List<FloatMenuOption> GetStatsList(WorkGroup group) {
-            var ret = new List<FloatMenuOption>();
-
-            // Enabled ones
-            ret.AddRange(group.ImportantStats.Select(wt =>
-                new FloatMenuOption($"ddEnabled".Translate(wt.LabelForFullStatListCap), () => group.ImportantStats.Remove(wt))));
-
-            ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
-
-            // Disabled ones
-            ret.AddRange(_settings.AllStatDefs.Where(wt => !group.ImportantStats.Contains(wt))
-                .Select(wt =>
-                    new FloatMenuOption($"ddDisabled".Translate(wt.LabelForFullStatListCap),
-                        () => group.ImportantStats.Add(wt))));
-
-            "lol".Translate();
             return ret;
         }
 

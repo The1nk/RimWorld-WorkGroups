@@ -23,16 +23,22 @@ namespace The1nk.WorkGroups {
         public WorkGroupsMapComponent(Map map) : base(map) {
             Settings = new WorkGroupsSettings();
             WorkGroupsSettings.SetSettings(Settings);
+            LogHelper.Info("WorkGroupsMapComponent.Ctor");
+            Prep();
         }
 
         public override void ExposeData() {
             base.ExposeData();
             Scribe_Deep.Look(ref Settings, "WorkGroupsSettings", null);
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) {
+                LogHelper.Info("WorkGroupsMapComponent.ExposeData - PostLoadInit");
+                Prep();
+            }
         }
 
         public override void MapComponentTick() {
             base.MapComponentTick();
-            Prep();
 
             if (Find.TickManager.CurTimeSpeed == TimeSpeed.Paused)
                 return;
@@ -67,6 +73,7 @@ namespace The1nk.WorkGroups {
 
             LogHelper.Info($"Done!");
         }
+
         private void Prep() {
             if (prepped)
                 return;
@@ -166,10 +173,9 @@ namespace The1nk.WorkGroups {
         }
 
         private IEnumerable<Trait> FetchTraitDefs(ref IEnumerable<Trait> allTraitDefs) {
-            if (allTraitDefs.Any())
-                return allTraitDefs;
-
             var tdList = allTraitDefs as List<Trait> ?? new List<Trait>();
+
+            tdList.Clear();
 
             foreach (var td in DefDatabase<TraitDef>.AllDefs) {
                 foreach (var degree in td.degreeDatas) {
@@ -179,36 +185,34 @@ namespace The1nk.WorkGroups {
 
             tdList = tdList.OrderBy(t => t.CurrentData.label).ToList();
 
-            tdList.ForEach(t => LogHelper.Verbose($"--Found Trait defName = '{t.LabelCap}'"));
+            tdList.ForEach(t => LogHelper.Info($"--Found Trait defName = '{t.CurrentData.label}'"));
 
             return tdList;
 
         }
 
         private IEnumerable<StatDef> FetchStatDefs(ref IEnumerable<StatDef> allStatDefs) {
-            if (allStatDefs.Any())
-                return allStatDefs;
-
             var sdList = allStatDefs as List<StatDef>;
+
+            sdList.Clear();
 
             sdList.AddRange(DefDatabase<StatDef>.AllDefsListForReading.Where(d => !d.alwaysHide && d.showOnPawns)
                 .OrderBy(d => d.category.displayOrder).ThenBy(d => d.displayPriorityInCategory));
 
-            sdList.ForEach(d => LogHelper.Verbose($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
+            sdList.ForEach(d => LogHelper.Info($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
 
             return sdList;
         }
 
         private IEnumerable<WorkTypeDef> FetchWorkTypes(ref IEnumerable<WorkTypeDef> allWorkTypes) {
-            if (allWorkTypes.Any())
-                return allWorkTypes;
-
             var awtList = allWorkTypes as List<WorkTypeDef>;
+
+            awtList.Clear();
 
             awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
                 .OrderByDescending(d => d.naturalPriority));
 
-            awtList.ForEach(w => LogHelper.Verbose($"--{w.labelShort}, defName = '{w.defName}'"));
+            awtList.ForEach(w => LogHelper.Info($"--{w.labelShort}, defName = '{w.defName}'"));
 
             return allWorkTypes;
         }
