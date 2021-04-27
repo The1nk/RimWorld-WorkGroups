@@ -180,7 +180,7 @@ namespace The1nk.WorkGroups {
 
             tdList = tdList.OrderBy(t => t.CurrentData.label).ToList();
 
-            tdList.ForEach(t => LogHelper.Info($"--Found Trait defName = '{t.CurrentData.label}'"));
+            //tdList.ForEach(t => LogHelper.Info($"--Found Trait defName = '{t.CurrentData.label}'"));
 
             return tdList;
 
@@ -194,7 +194,7 @@ namespace The1nk.WorkGroups {
             sdList.AddRange(DefDatabase<StatDef>.AllDefsListForReading.Where(d => !d.alwaysHide && d.showOnPawns)
                 .OrderBy(d => d.category.displayOrder).ThenBy(d => d.displayPriorityInCategory));
 
-            sdList.ForEach(d => LogHelper.Info($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
+            //sdList.ForEach(d => LogHelper.Info($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
 
             return sdList;
         }
@@ -207,7 +207,7 @@ namespace The1nk.WorkGroups {
             awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
                 .OrderByDescending(d => d.naturalPriority));
 
-            awtList.ForEach(w => LogHelper.Info($"--{w.labelShort}, defName = '{w.defName}'"));
+            //awtList.ForEach(w => LogHelper.Info($"--{w.labelShort}, defName = '{w.defName}'"));
 
             return allWorkTypes;
         }
