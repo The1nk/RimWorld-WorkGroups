@@ -48,6 +48,9 @@ namespace The1nk.WorkGroups.Windows
             Widgets.CheckboxLabeled(cbLocation, "cbSetPawnTitles".Translate(), ref _settings.SetPawnTitles);
 
             cbLocation.y += textHeight + verticalPadding;
+            Widgets.CheckboxLabeled(cbLocation, "cbSetPawnBadges".Translate(), ref _settings.SetBadges);
+
+            cbLocation.y += textHeight + verticalPadding;
             Widgets.CheckboxLabeled(cbLocation, "cbClearSchedules".Translate(), ref _settings.ClearOutSchedules);
 
             cbLocation.y += textHeight + verticalPadding;
@@ -199,6 +202,15 @@ namespace The1nk.WorkGroups.Windows
 
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.DisableTitleForThisWorkGroup, newLoc.height, !_settings.SetPawnTitles);
             newLoc.x += 90;
+
+            txtRec = new Rect(newLoc);
+            txtRec.width = 40;
+            if (Widgets.ButtonText(txtRec, "btnBadge".Translate())) {
+                var lst = GetBadgeList(group);
+                if (lst.Any())
+                    Find.WindowStack.Add(new FloatMenu(lst));
+            }
+            newLoc.x += 45;
             
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.AssignToEveryone, newLoc.height);
             newLoc.x += 70;
@@ -235,6 +247,20 @@ namespace The1nk.WorkGroups.Windows
             }
         }
 
+        private List<FloatMenuOption> GetBadgeList(WorkGroup group) {
+            var ret = new List<FloatMenuOption>();
+
+            if (!string.IsNullOrEmpty(group.Badge)) {
+                ret.Add(new FloatMenuOption(group.Badge, () => group.Badge = ""));
+                ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+            }
+
+            ret.AddRange(WorkGroupsSettings.GetSettings().AllBadges.Where(b => group.Badge != b.defName)
+                .Select(b => new FloatMenuOption(b.defName, () => group.Badge = b.defName)));
+
+            return ret;
+        }
+
         private void DrawHeader(Rect cbLocation) {
             var newLoc = new Rect(cbLocation);
 
@@ -249,6 +275,9 @@ namespace The1nk.WorkGroups.Windows
 
             Widgets.Label(newLoc, "gpHideTitles".Translate());
             newLoc.x += 90;
+
+            Widgets.Label(newLoc, "gpBadge".Translate());
+            newLoc.x += 45;
             
             Widgets.Label(newLoc, "gpEveryone".Translate());
             newLoc.x += 70;

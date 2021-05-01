@@ -22,6 +22,7 @@ namespace The1nk.WorkGroups.Models
         public List<Trait> TraitsMustHave;
         public List<Trait> TraitsWantToHave;
         public List<Trait> TraitsCantHave;
+        public string Badge;
 
         public WorkGroup(string name) {
             Name = name;
@@ -63,6 +64,7 @@ namespace The1nk.WorkGroups.Models
             Scribe_Collections.Look(ref TraitsMustHave, "TraitsMustHave", LookMode.Deep);
             Scribe_Collections.Look(ref TraitsWantToHave, "TraitsWantToHave", LookMode.Deep);
             Scribe_Collections.Look(ref TraitsCantHave, "TraitsCantHave", LookMode.Deep);
+            Scribe_Values.Look(ref Badge, "Badge");
         }
     }
 }

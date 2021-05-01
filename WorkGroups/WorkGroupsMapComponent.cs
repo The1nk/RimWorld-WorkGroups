@@ -13,12 +13,13 @@ namespace The1nk.WorkGroups {
         public static HediffDef SlaveHediff;
         public static MethodInfo RjwMethod;
         public static MethodInfo PlMethod;
+        private Type badgeCompType;
 
         private long lastUpdateTick = 0;
         private long nextUpdateTick = 0;
 
         public WorkGroupsSettings Settings;
-
+        
         public WorkGroupsMapComponent(Map map) : base(map) {
             Settings = new WorkGroupsSettings();
             WorkGroupsSettings.SetSettings(Settings); // Needed for open game -> new map
@@ -97,6 +98,18 @@ namespace The1nk.WorkGroups {
                 PlMethod = plType.GetMethod("LaborEnabled");
             Settings.PlInstalled = PlMethod != null;
 
+            var badgeDefType = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.BadgeDef", "RR_PawnBadge");
+            LogHelper.Info($"badgeDefType null ? {badgeDefType == null}");
+
+            if (badgeDefType != null) {
+                Settings.PbInstalled = true;
+                var pawnBadgeComp = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.CompBadge", "RR_PawnBadge");
+
+                if (pawnBadgeComp != null)
+                    badgeCompType = pawnBadgeComp;
+            }
+
+            Settings.AllBadges = FetchBadges(ref Settings.AllBadges, badgeDefType);
             Settings.AllWorkTypes = FetchWorkTypes(ref Settings.AllWorkTypes);
             Settings.AllStatDefs = FetchStatDefs(ref Settings.AllStatDefs);
             Settings.AllTraits = FetchTraitDefs(ref Settings.AllTraits);
@@ -165,6 +178,20 @@ namespace The1nk.WorkGroups {
             }
 
             LogHelper.Verbose("-Prep()");
+        }
+
+        private IEnumerable<Def> FetchBadges(ref IEnumerable<Def> settingsAllBadges, Type badgeDefType) {
+            var ret = new List<Def>();
+
+            if (badgeDefType == null)
+                return ret;
+
+            foreach (var def in GenDefDatabase.GetAllDefsInDatabaseForDef(badgeDefType)) {
+                ret.Add(def);
+                LogHelper.Info($"Found badge '{def.defName}'");
+            }
+
+            return ret;
         }
 
         private IEnumerable<Trait> FetchTraitDefs(ref IEnumerable<Trait> allTraitDefs) {
@@ -287,6 +314,12 @@ namespace The1nk.WorkGroups {
                 if (setPawnTitles)
                     pawn.Pawn.story.Title = string.Join(",", newTitle);
 
+                if (Settings.SetBadges) {
+                    var targetBadge = pawn.WorkGroups.FirstOrDefault(wg => !string.IsNullOrEmpty(wg.Badge))?.Badge ??
+                                      "";
+                    SetPawnBadge(pawn, targetBadge);
+                }
+
                 LogHelper.Verbose($"{pawn.Pawn.Name.ToStringShort} - {string.Join(",", newTitle)}");
 
                 // Force re-caching of workgivers
@@ -296,6 +329,21 @@ namespace The1nk.WorkGroups {
                 var tmp2 = pawn.Pawn.workSettings.WorkGiversInOrderNormal;
             }
             LogHelper.Verbose("-ApplyPriorities()");
+        }
+
+        private void SetPawnBadge(PawnWithWorkgroups pawn, string badge) {
+            var pawnComp = pawn.Pawn.AllComps.FirstOrDefault(c => c.GetType() == badgeCompType);
+
+            if (pawnComp == null)
+                return;
+
+            var field = badgeCompType.GetField("badges", BindingFlags.Public | BindingFlags.Instance);
+
+            if (field == null)
+                return;
+
+            var currentValue = (string[]) field.GetValue(pawnComp); // So we don't lose the manually selected 2nd badge
+            field.SetValue(pawnComp, new[] {badge, currentValue[1]});
         }
 
         private void ClearWorkGroups(ref IEnumerable<PawnWithWorkgroups> pawns) {
