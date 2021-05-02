@@ -62,7 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogHelper.cs" />
+    <Compile Include="Models\PawnBadge.cs" />
     <Compile Include="Models\ScoreCard.cs" />
+    <Compile Include="Models\TickThreadQueue.cs" />
     <Compile Include="Windows\MainTabWindow.cs" />
     <Compile Include="Models\PawnWithWorkgroups.cs" />
     <Compile Include="Models\UniqueId.cs" />

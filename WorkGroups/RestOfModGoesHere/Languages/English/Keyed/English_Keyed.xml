@@ -6,6 +6,7 @@
   <cbPrisonerPriorities>Set Priorities for Prisoners? (Requires Prison Labor)</cbPrisonerPriorities>
   <cbRjwPriorities>Set Priorities for Whores? (Requires RimJobWorld)</cbRjwPriorities>
   <cbSetPawnTitles>Set Pawn Titles? (Useful with 'Show Titles' feature of Guards For Me)</cbSetPawnTitles>
+  <cbSetPawnBadges>Set Pawn Badges? (Requires Pawn Badges)</cbSetPawnBadges>
   <cbClearSchedules>Clear Schedules?</cbClearSchedules>
   <cbForceBedRest>Forced Bed Rest for injured pawns?</cbForceBedRest>
   <cbUseLearningRates>Consider Learning Rate when selecting best pawn?</cbUseLearningRates>
@@ -24,6 +25,7 @@
   <gpEdit>Edit</gpEdit>
   <gpTargetQty>Target Qty</gpTargetQty>
   <gpHideTitles>Hide Titles</gpHideTitles>
+  <gpBadge>Badge</gpBadge>
   <gpEveryone>Everyone</gpEveryone>
   <gpColonists>Colonists</gpColonists>
   <gpSlaves>Slaves</gpSlaves>
@@ -37,6 +39,8 @@
   <ttAnd>What other WorkGroups can be assigned to the same pawn, who has been assigned this WorkGroup. This is useful for having your Doctors not planting, but your Growers being back-up Haulers.</ttAnd>
   <btnStats>Stats</btnStats>
   <ttStats>What Stats are important for this WorkGroup. These act as a multiplier for the skill value. A pawn with Lv8 in Plants and 2 field hands will be selected over a pawn with Lv10 in Plants, if Plant Work Speed is selected.</ttStats>
+  <btnBadge>Badge</btnBadge>
+  <ActiveBadge>Active</ActiveBadge>
 
   <!-- dropdowns -->
   <ddEnabled>ENABLED | {0}</ddEnabled>

@@ -6,6 +6,7 @@
   <cbPrisonerPriorities>囚犯可成为小队成员? (需求Prison Labor)</cbPrisonerPriorities>
   <cbRjwPriorities>妓术工作者可成为小队成员? (需求RimJobWorld)</cbRjwPriorities>
   <cbSetPawnTitles>给小人贴上小队标签名字? (配合"显示标签"功能很适合Guards For Me)</cbSetPawnTitles>
+  <cbSetPawnBadges>Set Pawn Badges? (Requires Pawn Badges)</cbSetPawnBadges>
   <cbClearSchedules>将新殖民者的时刻表全设为"任何"?</cbClearSchedules>
   <cbForceBedRest>是否强制病患卧床休息?</cbForceBedRest>
   <cbUseLearningRates>学习速度也作为衡量标准(即技能等级相同时，优先考虑学习速度快的)?</cbUseLearningRates>
@@ -24,6 +25,7 @@
   <gpEdit>设定</gpEdit>
   <gpTargetQty>小队人数</gpTargetQty>
   <gpHideTitles>隐藏标签</gpHideTitles>
+  <gpBadge>Badge</gpBadge>
   <gpEveryone>所有人</gpEveryone>
   <gpColonists>殖民者</gpColonists>
   <gpSlaves>奴隶</gpSlaves>
@@ -37,6 +39,8 @@
   <ttAnd>已属该小队的成员可同时分别兼任其他所选小队的工作。这适用于该小队某个成员拥有其他擅长的工作或你想让其兼任其他工作的情况。</ttAnd>
   <btnStats>能力</btnStats>
   <ttStats>该小队最重视的属性。所选属性也会成为衡量标准。例如，当选中种植速度为标准时，Mod会将同时包括8级种植技能和一双务农手的小人编入小队而非仅10级种植技能的小人。</ttStats>
+  <btnBadge>Badge</btnBadge>
+  <ActiveBadge>Active</ActiveBadge>
 
   <!-- dropdowns -->
   <ddEnabled>已允许 | {0}</ddEnabled>
