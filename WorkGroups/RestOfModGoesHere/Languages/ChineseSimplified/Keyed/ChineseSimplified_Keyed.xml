@@ -40,6 +40,7 @@
   <btnStats>能力</btnStats>
   <ttStats>该小队最重视的属性。所选属性也会成为衡量标准。例如，当选中种植速度为标准时，Mod会将同时包括8级种植技能和一双务农手的小人编入小队而非仅10级种植技能的小人。</ttStats>
   <btnBadge>Badge</btnBadge>
+  <ActiveBadge>Active</ActiveBadge>
 
   <!-- dropdowns -->
   <ddEnabled>已允许 | {0}</ddEnabled>

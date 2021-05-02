@@ -61,7 +61,7 @@ namespace The1nk.WorkGroups {
         public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
         public IEnumerable<Trait> AllTraits = new List<Trait>();
-        public IEnumerable<Def> AllBadges = new List<Def>();
+        public IEnumerable<PawnBadge> AllBadges = new List<PawnBadge>();
         
         public bool Enabled = false;
         public bool SetPrioritiesForSlaves = true; // Simple Slavery
@@ -274,7 +274,7 @@ namespace The1nk.WorkGroups {
                     WorkGroups.Clear();
 
                     for (int i = 13; i < lines.Length; i++) {
-                        WorkGroups.Add(GetWorkGroupFromSaveLine1dot3(lines[i], save, i-11));
+                        WorkGroups.Add(GetWorkGroupFromSaveLine1dot3(lines[i], save, i-12));
                     }
 
                     break;

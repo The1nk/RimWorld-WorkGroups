@@ -6,6 +6,7 @@ using System.Text;
 using HugsLib;
 using RimWorld;
 using The1nk.WorkGroups.Models;
+using UnityEngine;
 using Verse;
 
 namespace The1nk.WorkGroups {
@@ -19,11 +20,13 @@ namespace The1nk.WorkGroups {
         private long nextUpdateTick = 0;
 
         public WorkGroupsSettings Settings;
+
+        private static PropertyInfo badgeTextureProp;
         
         public WorkGroupsMapComponent(Map map) : base(map) {
             Settings = new WorkGroupsSettings();
             WorkGroupsSettings.SetSettings(Settings); // Needed for open game -> new map
-            Prep();
+            TickThreadQueue.EnqueueItem(Prep);
         }
 
         public override void ExposeData() {
@@ -31,11 +34,12 @@ namespace The1nk.WorkGroups {
             Scribe_Deep.Look(ref Settings, "WorkGroupsSettings", null);
 
             WorkGroupsSettings.SetSettings(Settings); // Needed for open game -> load save
-            Prep();
+            TickThreadQueue.EnqueueItem(Prep);
         }
 
         public override void MapComponentTick() {
             base.MapComponentTick();
+            TickThreadQueue.DoOne();
 
             if (Find.TickManager.CurTimeSpeed == TimeSpeed.Paused)
                 return;
@@ -99,7 +103,7 @@ namespace The1nk.WorkGroups {
             Settings.PlInstalled = PlMethod != null;
 
             var badgeDefType = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.BadgeDef", "RR_PawnBadge");
-            LogHelper.Info($"badgeDefType null ? {badgeDefType == null}");
+            LogHelper.Verbose($"Pawn Badge found ? {badgeDefType != null}");
 
             if (badgeDefType != null) {
                 Settings.PbInstalled = true;
@@ -108,6 +112,9 @@ namespace The1nk.WorkGroups {
                 if (pawnBadgeComp != null)
                     badgeCompType = pawnBadgeComp;
             }
+
+            if (Settings.AllBadges == null)
+                Settings.AllBadges = new List<PawnBadge>();
 
             Settings.AllBadges = FetchBadges(ref Settings.AllBadges, badgeDefType);
             Settings.AllWorkTypes = FetchWorkTypes(ref Settings.AllWorkTypes);
@@ -180,15 +187,24 @@ namespace The1nk.WorkGroups {
             LogHelper.Verbose("-Prep()");
         }
 
-        private IEnumerable<Def> FetchBadges(ref IEnumerable<Def> settingsAllBadges, Type badgeDefType) {
-            var ret = new List<Def>();
+        private IEnumerable<PawnBadge> FetchBadges(ref IEnumerable<PawnBadge> settingsAllBadges, Type badgeDefType) {
+            var ret = new List<PawnBadge>();
 
             if (badgeDefType == null)
                 return ret;
 
+            if (badgeTextureProp == null)
+                badgeTextureProp = badgeDefType.GetProperty("Symbol", BindingFlags.Instance | BindingFlags.Public);
+
+            if (badgeTextureProp == null) {
+                LogHelper.Error("Failed to get PropertyInfo for Symbol from Pawn Badge! :(");
+                return ret;
+            }
+
             foreach (var def in GenDefDatabase.GetAllDefsInDatabaseForDef(badgeDefType)) {
-                ret.Add(def);
-                LogHelper.Info($"Found badge '{def.defName}'");
+                var texture = (Texture2D) badgeTextureProp.GetValue(def);
+
+                ret.Add(new PawnBadge(def, texture));
             }
 
             return ret;
@@ -207,10 +223,7 @@ namespace The1nk.WorkGroups {
 
             tdList = tdList.OrderBy(t => t.CurrentData.label).ToList();
 
-            //tdList.ForEach(t => LogHelper.Info($"--Found Trait defName = '{t.CurrentData.label}'"));
-
             return tdList;
-
         }
 
         private IEnumerable<StatDef> FetchStatDefs(ref IEnumerable<StatDef> allStatDefs) {
@@ -220,8 +233,6 @@ namespace The1nk.WorkGroups {
 
             sdList.AddRange(DefDatabase<StatDef>.AllDefsListForReading.Where(d => !d.alwaysHide && d.showOnPawns)
                 .OrderBy(d => d.category.displayOrder).ThenBy(d => d.displayPriorityInCategory));
-
-            //sdList.ForEach(d => LogHelper.Info($"--Found Stat {d.LabelForFullStatListCap}, defName = '{d.defName}'"));
 
             return sdList;
         }
@@ -233,8 +244,6 @@ namespace The1nk.WorkGroups {
 
             awtList.AddRange(DefDatabase<WorkTypeDef>.AllDefsListForReading.Where(d => d.visible)
                 .OrderByDescending(d => d.naturalPriority));
-
-            //awtList.ForEach(w => LogHelper.Info($"--{w.labelShort}, defName = '{w.defName}'"));
 
             return allWorkTypes;
         }

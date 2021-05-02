@@ -117,7 +117,8 @@ namespace The1nk.WorkGroups.Windows
             DrawHeader(cbLocation);
             cbLocation.y += textHeight + verticalPadding;
 
-            var outRect = new Rect(cbLocation.x, cbLocation.y, cbLocation.width, 300);
+            var outRect = new Rect(cbLocation.x, cbLocation.y, cbLocation.width,
+                inRect.height - cbLocation.y - verticalPadding);
             var viewRect = new Rect(0, 0, outRect.width - 18f,
                 (textHeight + verticalPadding) * _settings.WorkGroups.Count + 100);
             Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect);
@@ -201,16 +202,16 @@ namespace The1nk.WorkGroups.Windows
             newLoc.x += 70;
 
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.DisableTitleForThisWorkGroup, newLoc.height, !_settings.SetPawnTitles);
-            newLoc.x += 90;
+            newLoc.x += 80;
 
             txtRec = new Rect(newLoc);
-            txtRec.width = 40;
+            txtRec.width = 45;
             if (Widgets.ButtonText(txtRec, "btnBadge".Translate())) {
                 var lst = GetBadgeList(group);
                 if (lst.Any())
                     Find.WindowStack.Add(new FloatMenu(lst));
             }
-            newLoc.x += 45;
+            newLoc.x += 50;
             
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.AssignToEveryone, newLoc.height);
             newLoc.x += 70;
@@ -226,7 +227,7 @@ namespace The1nk.WorkGroups.Windows
             
             if (_settings.RjwInstalled) {
                 Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed, newLoc.height, !_settings.RjwInstalled);
-                newLoc.x += 70;
+                newLoc.x += 55;
             }
 
             txtRec = new Rect(newLoc);
@@ -250,13 +251,22 @@ namespace The1nk.WorkGroups.Windows
         private List<FloatMenuOption> GetBadgeList(WorkGroup group) {
             var ret = new List<FloatMenuOption>();
 
-            if (!string.IsNullOrEmpty(group.Badge)) {
-                ret.Add(new FloatMenuOption(group.Badge, () => group.Badge = ""));
-                ret.Add(new FloatMenuOption("---", () => LogHelper.Verbose("Clicked the divider -_-;;")));
+            if (!WorkGroupsSettings.GetSettings().AllBadges.Any())
+                return ret;
+
+            if (WorkGroupsSettings.GetSettings().AllBadges.All(b => b.Def.defName != @group.Badge)) {
+                group.Badge = "";
             }
 
-            ret.AddRange(WorkGroupsSettings.GetSettings().AllBadges.Where(b => group.Badge != b.defName)
-                .Select(b => new FloatMenuOption(b.defName, () => group.Badge = b.defName)));
+            if (!string.IsNullOrEmpty(group.Badge)) {
+                ret.Add(new FloatMenuOption("ActiveBadge".Translate(), () => group.Badge = "",
+                    WorkGroupsSettings.GetSettings().AllBadges.First(b => b.Def.defName == group.Badge).Texture,
+                    Color.white));
+            }
+
+            ret.AddRange(WorkGroupsSettings.GetSettings().AllBadges.Where(b => group.Badge != b.Def.defName)
+                .Select(b =>
+                    new FloatMenuOption(b.Def.defName, () => group.Badge = b.Def.defName, b.Texture, Color.white)));
 
             return ret;
         }
@@ -274,10 +284,10 @@ namespace The1nk.WorkGroups.Windows
             newLoc.x += 70;
 
             Widgets.Label(newLoc, "gpHideTitles".Translate());
-            newLoc.x += 90;
+            newLoc.x += 80;
 
             Widgets.Label(newLoc, "gpBadge".Translate());
-            newLoc.x += 45;
+            newLoc.x += 50;
             
             Widgets.Label(newLoc, "gpEveryone".Translate());
             newLoc.x += 70;

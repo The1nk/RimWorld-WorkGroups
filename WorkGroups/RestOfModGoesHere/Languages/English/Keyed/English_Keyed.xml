@@ -40,6 +40,7 @@
   <btnStats>Stats</btnStats>
   <ttStats>What Stats are important for this WorkGroup. These act as a multiplier for the skill value. A pawn with Lv8 in Plants and 2 field hands will be selected over a pawn with Lv10 in Plants, if Plant Work Speed is selected.</ttStats>
   <btnBadge>Badge</btnBadge>
+  <ActiveBadge>Active</ActiveBadge>
 
   <!-- dropdowns -->
   <ddEnabled>ENABLED | {0}</ddEnabled>
