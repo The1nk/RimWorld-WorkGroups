@@ -510,7 +510,11 @@ namespace The1nk.WorkGroups {
                                     if (Settings.UseLearningRates)
                                         multiplier = pawnSkill.LearnRateFactor();
 
-                                    thisPawnsSkill += multiplier * (pawnSkill.Level + 1); // This stupid +1 insures that if a pawn's level is 0, their stats still matter in the ImportantStats section below
+                                    thisPawnsSkill +=
+                                        multiplier *
+                                        (pawnSkill.Level
+                                         + 1 // This stupid +1 insures that if a pawn's level is 0, their stats still matter in the ImportantStats section below
+                                         + pawnSkill.XpProgressPercent); // This + XpProgressPercent will make it so it doesn't flip-flop between multiple pawns who have the same level, since their XP% is likely different
                                 }
                             else
                                 thisPawnsSkill += 3f;

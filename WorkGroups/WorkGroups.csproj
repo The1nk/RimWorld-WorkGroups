@@ -93,7 +93,9 @@
     <Content Include="RestOfModGoesHere\About\PublishedFileId.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="RestOfModGoesHere\Languages\ChineseSimplified\Keyed\ChineseSimplified_Keyed.xml" />
+    <Content Include="RestOfModGoesHere\Languages\ChineseSimplified\Keyed\ChineseSimplified_Keyed.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RestOfModGoesHere\Languages\English\Keyed\English_Keyed.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
