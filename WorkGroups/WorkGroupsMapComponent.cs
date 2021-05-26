@@ -574,8 +574,127 @@ namespace The1nk.WorkGroups {
         }
 
         private float GetStatValue(Pawn pawn, StatDef stat) {
+            return CopiedAndModified_GetValueUnfinalized(stat.Worker, StatRequest.For(pawn), stat);
+        }
 
-            return pawn.GetStatValue(stat, false);
+        private float CopiedAndModified_GetValueUnfinalized(StatWorker statWorker, StatRequest req, StatDef stat) {
+            if (!stat.supressDisabledError && Prefs.DevMode && statWorker.IsDisabledFor(req.Thing))
+                Log.ErrorOnce(
+                    string.Format(
+                        "Attempted to calculate value for disabled stat {0}; this is meant as a consistency check, either set the stat to neverDisabled or ensure this pawn cannot accidentally use this stat (thing={1})",
+                        (object) stat, (object) req.Thing.ToStringSafe<Thing>()),
+                    75193282 + (int) stat.index);
+            float a = stat.defaultBaseValue;
+            Pawn thing = null;
+            if (req.Thing is Pawn)
+                thing = (Pawn) req.Thing;
+
+            if (req.Thing is Pawn) {
+                if (thing.skills != null) {
+                    if (stat.skillNeedOffsets != null) {
+                        for (int index = 0; index < stat.skillNeedOffsets.Count; ++index)
+                            a += stat.skillNeedOffsets[index].ValueFor(thing);
+                    }
+                }
+                else
+                    a += stat.noSkillOffset;
+
+                if (stat.capacityOffsets != null) {
+                    for (int index = 0; index < stat.capacityOffsets.Count; ++index) {
+                        PawnCapacityOffset capacityOffset = stat.capacityOffsets[index];
+                        a += capacityOffset.GetOffset(thing.health.capacities.GetLevel(capacityOffset.capacity));
+                    }
+                }
+
+                if (thing.story != null) {
+                    for (int index = 0; index < thing.story.traits.allTraits.Count; ++index)
+                        a += thing.story.traits.allTraits[index].OffsetOfStat(stat);
+                }
+
+                List<Hediff> hediffs = thing.health.hediffSet.hediffs;
+                for (int index = 0; index < hediffs.Count; ++index) {
+                    HediffStage curStage = hediffs[index].CurStage;
+                    if (curStage != null) {
+                        float statOffsetFromList = curStage.statOffsets.GetStatOffsetFromList(stat);
+                        if ((double) statOffsetFromList != 0.0 && curStage.statOffsetEffectMultiplier != null)
+                            statOffsetFromList *= thing.GetStatValue(curStage.statOffsetEffectMultiplier);
+                        a += statOffsetFromList;
+                    }
+                }
+
+                if (thing.apparel != null) {
+                    for (int index = 0; index < thing.apparel.WornApparel.Count; ++index)
+                        a += StatWorker.StatOffsetFromGear((Thing) thing.apparel.WornApparel[index], stat);
+                }
+
+                if (thing.equipment != null && thing.equipment.Primary != null)
+                    a += StatWorker.StatOffsetFromGear((Thing) thing.equipment.Primary, stat);
+                if (thing.story != null) {
+                    for (int index = 0; index < thing.story.traits.allTraits.Count; ++index)
+                        a *= thing.story.traits.allTraits[index].MultiplierOfStat(stat);
+                }
+
+                for (int index = 0; index < hediffs.Count; ++index) {
+                    HediffStage curStage = hediffs[index].CurStage;
+                    if (curStage != null) {
+                        float factor = curStage.statFactors.GetStatFactorFromList(stat);
+                        if ((double) Math.Abs(factor - 1f) > 1.40129846432482E-45 &&
+                            curStage.statFactorEffectMultiplier != null)
+                            factor = StatWorker.ScaleFactor(factor,
+                                thing.GetStatValue(curStage.statFactorEffectMultiplier));
+                        a *= factor;
+                    }
+                }
+
+                a *= thing.ageTracker.CurLifeStage.statFactors.GetStatFactorFromList(stat);
+            }
+
+            if (req.StuffDef != null) {
+                if ((double) a > 0.0 || stat.applyFactorsIfNegative)
+                    a *= req.StuffDef.stuffProps.statFactors.GetStatFactorFromList(stat);
+                a += req.StuffDef.stuffProps.statOffsets.GetStatOffsetFromList(stat);
+            }
+
+            //if (req.ForAbility && stat.statFactors != null) {
+            //    for (int index = 0; index < stat.statFactors.Count; ++index)
+            //        a *= req.AbilityDef.statBases.GetStatValueFromList(stat.statFactors[index], 1f);
+            //}
+
+            if (req.HasThing) {
+                CompAffectedByFacilities comp = req.Thing.TryGetComp<CompAffectedByFacilities>();
+                if (comp != null)
+                    a += comp.GetStatOffset(stat);
+                //if (stat.statFactors != null) {
+                //    for (int index = 0; index < stat.statFactors.Count; ++index)
+                //        a *= req.Thing.GetStatValue(stat.statFactors[index]);
+                //}
+
+                if (thing != null) {
+                    if (thing.skills != null) {
+                        if (stat.skillNeedFactors != null) {
+                            for (int index = 0; index < stat.skillNeedFactors.Count; ++index)
+                                a *= stat.skillNeedFactors[index].ValueFor(thing);
+                        }
+                    }
+                    else
+                        a *= stat.noSkillFactor;
+
+                    if (stat.capacityFactors != null) {
+                        for (int index = 0; index < stat.capacityFactors.Count; ++index) {
+                            PawnCapacityFactor capacityFactor = stat.capacityFactors[index];
+                            float factor =
+                                capacityFactor.GetFactor(thing.health.capacities.GetLevel(capacityFactor.capacity));
+                            a = Mathf.Lerp(a, a * factor, capacityFactor.weight);
+                        }
+                    }
+
+                    if (thing.Inspired)
+                        a = (a + thing.InspirationDef.statOffsets.GetStatOffsetFromList(stat)) *
+                            thing.InspirationDef.statFactors.GetStatFactorFromList(stat);
+                }
+            }
+
+            return a;
         }
 
         private IEnumerable<PawnWithWorkgroups> FetchColonists() {
