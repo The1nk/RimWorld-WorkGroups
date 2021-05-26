@@ -9,8 +9,6 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsSettings : IExposable {
-        private static WorkGroupsSettings _instance;
-
         private bool _ssInstalled;
         private bool _plInstalled;
         private bool _rjwInstalled;
@@ -55,8 +53,6 @@ namespace The1nk.WorkGroups {
                 _pbInstalled = value;
             }
         }
-
-        
 
         public IEnumerable<StatDef> AllStatDefs = new List<StatDef>();
         public IEnumerable<WorkTypeDef> AllWorkTypes = new List<WorkTypeDef>();
@@ -499,11 +495,11 @@ namespace The1nk.WorkGroups {
 
 
         public static WorkGroupsSettings GetSettings() {
-            return _instance;
+            return Find.CurrentMap.GetComponent<WorkGroupsMapComponent>().Settings;
         }
 
         public static void SetSettings(WorkGroupsSettings settings) {
-            _instance = settings;
+            //_instance = settings;
         }
     }
 }

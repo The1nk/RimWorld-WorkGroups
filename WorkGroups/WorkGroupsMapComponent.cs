@@ -54,7 +54,7 @@ namespace The1nk.WorkGroups {
         }
 
         public void RunNow() {
-            Settings = WorkGroupsSettings.GetSettings();
+            //Settings = WorkGroupsSettings.GetSettings();
 
             var thisTick = GenTicks.TicksGame;
 
@@ -269,7 +269,7 @@ namespace The1nk.WorkGroups {
                 pawn.Pawn.workSettings.EnableAndInitialize();
                 pawn.Pawn.workSettings.DisableAll();
 
-                Settings = WorkGroupsSettings.GetSettings();
+                //Settings = WorkGroupsSettings.GetSettings();
 
                 if (Settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
                     foreach (var awt in WorkGroupsSettings.GetSettings().AllWorkTypes) {
