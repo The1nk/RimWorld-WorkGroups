@@ -418,7 +418,12 @@ namespace The1nk.WorkGroups {
                 TraitsMustHave = new List<Trait>(),
                 TraitsWantToHave = new List<Trait>(),
                 TraitsCantHave = new List<Trait>(),
-                Badge = ""
+                Badge = "",
+                Items = new List<WorkTypeDef>(),
+                CanBeAssignedWith = new List<string>(),
+                ImportantStats = new List<StatDef>(),
+                HighStats = new List<StatDef>(),
+                LowStats = new List<StatDef>(),
             };
 
             var mode = 1;
@@ -427,6 +432,8 @@ namespace The1nk.WorkGroups {
                     mode++;
                     continue;
                 }
+
+                LogHelper.Warning($"Line '{line}', LineNum {i:0}, Mode {mode:0} ... ");
 
                 switch (mode) {
                     case 1:
@@ -453,7 +460,7 @@ namespace The1nk.WorkGroups {
 
                     case 5:
                         var lineParts = lines[i].Split(new[] {"___"}, StringSplitOptions.None);
-                        var traitDef = AllTraits.FirstOrDefault(t => t.def.defName == lineParts[0]).def;
+                        var traitDef = AllTraits.FirstOrDefault(t => t.def.defName == lineParts[0])?.def;
                         if (traitDef != null) {
                             var t = new Trait(traitDef, int.Parse(lineParts[1]));
                             grp.TraitsMustHave.Add(t);
@@ -463,7 +470,7 @@ namespace The1nk.WorkGroups {
 
                     case 6:
                         var lineParts2 = lines[i].Split(new[] {"___"}, StringSplitOptions.None);
-                        var traitDef2 = AllTraits.FirstOrDefault(t => t.def.defName == lineParts2[0]).def;
+                        var traitDef2 = AllTraits.FirstOrDefault(t => t.def.defName == lineParts2[0])?.def;
                         if (traitDef2 != null) {
                             var t = new Trait(traitDef2, int.Parse(lineParts2[1]));
                             grp.TraitsWantToHave.Add(t);
@@ -473,7 +480,7 @@ namespace The1nk.WorkGroups {
 
                     case 7:
                         var lineParts3 = lines[i].Split(new[] {"___"}, StringSplitOptions.None);
-                        var traitDef3 = AllTraits.FirstOrDefault(t => t.def.defName == lineParts3[0]).def;
+                        var traitDef3 = AllTraits.FirstOrDefault(t => t.def.defName == lineParts3[0])?.def;
                         if (traitDef3 != null) {
                             var t = new Trait(traitDef3, int.Parse(lineParts3[1]));
                             grp.TraitsCantHave.Add(t);

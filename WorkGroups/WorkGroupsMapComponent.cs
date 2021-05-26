@@ -527,7 +527,7 @@ namespace The1nk.WorkGroups {
                         foreach (var importantStat in wg.HighStats) {
                             entry.Stats.Add(new ScoreCardEntryStat() {
                                 Stat =  importantStat,
-                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                StatValue = GetStatValue(pawn.Pawn, importantStat),
                                 IsLowStat = false
                             });
                         }
@@ -535,7 +535,7 @@ namespace The1nk.WorkGroups {
                         foreach (var importantStat in wg.LowStats) {
                             entry.Stats.Add(new ScoreCardEntryStat() {
                                 Stat =  importantStat,
-                                StatValue = pawn.Pawn.GetStatValue(importantStat),
+                                StatValue = GetStatValue(pawn.Pawn, importantStat),
                                 IsLowStat = true
                             });
                         }
@@ -571,6 +571,11 @@ namespace The1nk.WorkGroups {
 
             LogHelper.Verbose($"-UpdatePriorities() -- changedSomething={changedSomething}");
             return changedSomething;
+        }
+
+        private float GetStatValue(Pawn pawn, StatDef stat) {
+
+            return pawn.GetStatValue(stat, false);
         }
 
         private IEnumerable<PawnWithWorkgroups> FetchColonists() {
