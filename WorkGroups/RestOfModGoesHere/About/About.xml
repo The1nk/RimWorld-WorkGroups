@@ -3,7 +3,7 @@
 	<name>WorkGroups | Automatic Job Role Assigner</name>
 	<author>The1nk</author>
 	<supportedVersions>
-		<li>1.2</li>
+		<li>1.3</li>
 	</supportedVersions>
 	<packageId>The1nk.WorkGroups</packageId>
 	<description>WorkGroups!</description>
@@ -14,4 +14,7 @@
       <steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=818773962</steamWorkshopUrl>
     </li>
   </modDependencies>
+    <incompatibleWith>
+        <li>voult.betterpawncontrol</li>
+    </incompatibleWith>
 </ModMetaData>
