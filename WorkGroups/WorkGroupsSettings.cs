@@ -73,8 +73,6 @@ namespace The1nk.WorkGroups {
         public bool ForcedBedRestForInjuredPawns = true;
         public bool UseLearningRates;
 
-        private string _baseDir = "";
-
         public WorkGroupsSettings() {
             WorkGroups = new List<WorkGroup>();
         }
@@ -429,7 +427,7 @@ namespace The1nk.WorkGroups {
                     continue;
                 }
 
-                LogHelper.Warning($"Line '{line}', LineNum {i:0}, Mode {mode:0} ... ");
+                LogHelper.Verbose($"Line '{line}', LineNum {i:0}, Mode {mode:0} ... ");
 
                 switch (mode) {
                     case 1:

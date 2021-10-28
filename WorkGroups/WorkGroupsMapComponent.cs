@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using HugsLib;
 using RimWorld;
+using RuntimeAudioClipLoader;
 using The1nk.WorkGroups.Models;
 using UnityEngine;
 using Verse;
@@ -14,6 +15,11 @@ namespace The1nk.WorkGroups {
         public static HediffDef SlaveHediff;
         public static MethodInfo RjwMethod;
         public static MethodInfo PlMethod;
+
+        public static object WtManager;
+        public static PropertyInfo WtMethod;
+        public static MethodInfo WtMethod2;
+        
         private Type badgeCompType;
 
         private long lastUpdateTick = 0;
@@ -86,24 +92,45 @@ namespace The1nk.WorkGroups {
                 Settings.WorkGroups = new List<WorkGroup>();
 
             SlaveHediff = DefDatabase<HediffDef>.GetNamedSilentFail("Enslaved");
-            LogHelper.Verbose("SS Type found? " + (SlaveHediff != null));
+            LogHelper.Warning("SS Type found? " + (SlaveHediff != null));
             Settings.SsInstalled = SlaveHediff != null;
             
             var rjwType = GenTypes.GetTypeInAnyAssembly("rjw.xxx", "rjw");
-            LogHelper.Verbose("RJW Type found? " + (rjwType != null));
+            LogHelper.Warning("RJW Type found? " + (rjwType != null));
             if (rjwType != null)
                 RjwMethod = rjwType.GetMethod("is_whore");
 
             Settings.RjwInstalled = RjwMethod != null;
 
             var plType = GenTypes.GetTypeInAnyAssembly("PrisonLabor.Core.PrisonLaborUtility", "PrisonLabor.Core");
-            LogHelper.Verbose("Prison Labor Type found? " + (plType != null));
+            LogHelper.Warning("Prison Labor Type found? " + (plType != null));
             if (plType != null)
                 PlMethod = plType.GetMethod("LaborEnabled");
             Settings.PlInstalled = PlMethod != null;
 
             var badgeDefType = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.BadgeDef", "RR_PawnBadge");
-            LogHelper.Verbose($"Pawn Badge found ? {badgeDefType != null}");
+            LogHelper.Warning($"Pawn Badge found ? {badgeDefType != null}");
+
+            var wtType = GenTypes.GetTypeInAnyAssembly("WorkTab.PriorityManager", "WorkTab");
+            LogHelper.Warning("Work Tab found? " + (wtType != null));
+            if (wtType != null)
+            {
+                // var getProp = wtType.GetProperty("Get", BindingFlags.Public | BindingFlags.Static);
+                // WtManager = getProp.GetValue(null);
+                // WtMethod = wtType.GetProperties().First(p => p.GetIndexParameters().Length > 0);
+                LogHelper.Warning("Derp");
+                WtMethod2 = GenTypes.GetTypeInAnyAssembly("WorkTab.Pawn_Extensions", "WorkTab")
+                    .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .FirstOrDefault(m => m.Name == "SetPriority" &&
+                                         m.ReturnType == typeof(void) &&
+                                         m.GetParameters()[0].ParameterType == typeof(Pawn) &&
+                                         m.GetParameters()[1].ParameterType == typeof(WorkTypeDef) &&
+                                         m.GetParameters()[2].ParameterType == typeof(int) &&
+                                         m.GetParameters()[3].ParameterType == typeof(List<int>));
+                LogHelper.Warning("WorkTab.Pawn_Extensions.SetPriority(Pawn, WorkTypeDef, int, List<int>) found? " +
+                                  (WtMethod2 != null));
+                LogHelper.Warning("Dope");
+            }
 
             if (badgeDefType != null) {
                 Settings.PbInstalled = true;
@@ -264,12 +291,10 @@ namespace The1nk.WorkGroups {
 
                 var newTitle = new List<string>();
 
-                pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
-                pawn.Pawn.Notify_DisabledWorkTypesChanged();
-                pawn.Pawn.workSettings.EnableAndInitialize();
+                // pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                // pawn.Pawn.Notify_DisabledWorkTypesChanged();
+                // pawn.Pawn.workSettings.EnableAndInitialize();
                 pawn.Pawn.workSettings.DisableAll();
-
-                //Settings = WorkGroupsSettings.GetSettings();
 
                 if (Settings.ForcedBedRestForInjuredPawns && HealthAIUtility.ShouldSeekMedicalRest(pawn.Pawn)) {
                     foreach (var awt in WorkGroupsSettings.GetSettings().AllWorkTypes) {
@@ -278,7 +303,7 @@ namespace The1nk.WorkGroups {
                         if (awt.defName == "PatientBedRest" || awt.defName == "Patient")
                             priority = 1;
 
-                        pawn.Pawn.workSettings.SetPriority(awt, priority);
+                        pawn.SetWorkPriority(awt, priority);
                     }
 
                     newTitle.Add("Resting");
@@ -291,22 +316,17 @@ namespace The1nk.WorkGroups {
                         currentPriority++;
 
                         currentPriority = Math.Min(currentPriority, Settings.MaxPriority);
-                        
-                        foreach (var wgi in wg.Items) {
-                            if (seenTypes.Contains(wgi)) {
+
+                        foreach (var wgi in wg.Items)
+                        {
+                            if (seenTypes.Contains(wgi))
+                            {
                                 LogHelper.Verbose($"Already seen {wgi.labelShort}, bailing out");
                                 continue; // Only set each WorkType priority *once*. First-come-first-serve!!
                             }
 
-                            if (!disabled.Contains(wgi)) {
-                                var was = pawn.Pawn.workSettings.GetPriority(wgi);
-                                pawn.Pawn.workSettings.SetPriority(wgi, currentPriority);
-                                var isNow = pawn.Pawn.workSettings.GetPriority(wgi);
-
-                                if (isNow != currentPriority)
-                                    Log.Warning(
-                                        $"Tried to set '{pawn.Pawn.Name.ToStringShort}'.'{wgi.labelShort}' to {currentPriority}, but it's still set to {isNow:0}!");
-                            }
+                            if (!disabled.Contains(wgi))
+                                pawn.SetWorkPriority(wgi, currentPriority);
 
                             seenTypes.Add(wgi);
                         }
@@ -331,11 +351,14 @@ namespace The1nk.WorkGroups {
 
                 LogHelper.Verbose($"{pawn.Pawn.Name.ToStringShort} - {string.Join(",", newTitle)}");
 
-                // Force re-caching of workgivers
+                // if (WtMethod == null)
+                // {
+                //     // Force re-caching of workgivers
                 pawn.Pawn.workSettings.Notify_UseWorkPrioritiesChanged();
                 pawn.Pawn.Notify_DisabledWorkTypesChanged();
-                var tmp = pawn.Pawn.workSettings.WorkGiversInOrderEmergency;
-                var tmp2 = pawn.Pawn.workSettings.WorkGiversInOrderNormal;
+                //     var tmp = pawn.Pawn.workSettings.WorkGiversInOrderEmergency;
+                //     var tmp2 = pawn.Pawn.workSettings.WorkGiversInOrderNormal;   
+                // }
             }
             LogHelper.Verbose("-ApplyPriorities()");
         }
@@ -376,7 +399,6 @@ namespace The1nk.WorkGroups {
 
                 for (int i = 0; i < wg.TargetQuantity; i++) {
                     PawnWithWorkgroups bestPawn = null;
-                    float averageSkill = -1f;
                     LogHelper.Verbose($"- Looking for a {wg.Name}.. " + (wg.AssignToEveryone ? " everyone!" : ""));
 
                     var filteredPawns = pawns.Where(p => !p.WorkGroups.Contains(wg));

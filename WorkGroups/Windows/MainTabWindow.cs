@@ -21,7 +21,6 @@ namespace The1nk.WorkGroups.Windows
         private WorkGroupsSettings _settings;
 
         public override void DoWindowContents(UnityEngine.Rect inRect) {
-            base.DoWindowContents(inRect);
             string buffer = _settings.HoursUpdateInterval.ToString("0");
             string buffer2 = _settings.MaxPriority.ToString("0");
 
