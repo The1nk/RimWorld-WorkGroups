@@ -12,14 +12,8 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsMapComponent : MapComponent {
-        public static HediffDef SlaveHediff;
         public static MethodInfo RjwMethod;
-        public static MethodInfo PlMethod;
 
-        public static object WtManager;
-        public static PropertyInfo WtMethod;
-        public static MethodInfo WtMethod2;
-        
         private Type badgeCompType;
 
         private long lastUpdateTick = 0;
@@ -98,27 +92,6 @@ namespace The1nk.WorkGroups {
 
             var badgeDefType = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.BadgeDef", "RR_PawnBadge");
             LogHelper.Warning($"Pawn Badge found ? {badgeDefType != null}");
-
-            var wtType = GenTypes.GetTypeInAnyAssembly("WorkTab.PriorityManager", "WorkTab");
-            LogHelper.Warning("Work Tab found? " + (wtType != null));
-            if (wtType != null)
-            {
-                // var getProp = wtType.GetProperty("Get", BindingFlags.Public | BindingFlags.Static);
-                // WtManager = getProp.GetValue(null);
-                // WtMethod = wtType.GetProperties().First(p => p.GetIndexParameters().Length > 0);
-                LogHelper.Warning("Derp");
-                WtMethod2 = GenTypes.GetTypeInAnyAssembly("WorkTab.Pawn_Extensions", "WorkTab")
-                    .GetMethods(BindingFlags.Public | BindingFlags.Static)
-                    .FirstOrDefault(m => m.Name == "SetPriority" &&
-                                         m.ReturnType == typeof(void) &&
-                                         m.GetParameters()[0].ParameterType == typeof(Pawn) &&
-                                         m.GetParameters()[1].ParameterType == typeof(WorkTypeDef) &&
-                                         m.GetParameters()[2].ParameterType == typeof(int) &&
-                                         m.GetParameters()[3].ParameterType == typeof(List<int>));
-                LogHelper.Warning("WorkTab.Pawn_Extensions.SetPriority(Pawn, WorkTypeDef, int, List<int>) found? " +
-                                  (WtMethod2 != null));
-                LogHelper.Warning("Dope");
-            }
 
             if (badgeDefType != null) {
                 Settings.PbInstalled = true;
