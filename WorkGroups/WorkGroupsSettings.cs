@@ -9,30 +9,8 @@ using Verse;
 
 namespace The1nk.WorkGroups {
     public class WorkGroupsSettings : IExposable {
-        private bool _ssInstalled;
-        private bool _plInstalled;
         private bool _rjwInstalled;
         private bool _pbInstalled;
-
-        public bool SsInstalled {
-            get => _ssInstalled;
-            set {
-                if (value == false)
-                    SetPrioritiesForSlaves = false;
-
-                _ssInstalled = value;
-            }
-        }
-
-        public bool PlInstalled {
-            get => _plInstalled;
-            set {
-                if (value == false)
-                    SetPrioritiesForPrisoners = false;
-
-                _plInstalled = value;
-            }
-        }
 
         public bool RjwInstalled {
             get => _rjwInstalled;
@@ -60,8 +38,7 @@ namespace The1nk.WorkGroups {
         public IEnumerable<PawnBadge> AllBadges = new List<PawnBadge>();
         
         public bool Enabled = false;
-        public bool SetPrioritiesForSlaves = true; // Simple Slavery
-        public bool SetPrioritiesForPrisoners = true; // Prison Labor
+        public bool SetPrioritiesForSlaves = true; // Ideology
         public bool SetPrioritiesForRjwWorkers = true; // RJW
         public bool SetBadges; // Pawn Badges
         public bool SetPawnTitles = true;
@@ -80,7 +57,6 @@ namespace The1nk.WorkGroups {
         public void ExposeData() {
             Scribe_Values.Look(ref Enabled, "Enabled", false, true);
             Scribe_Values.Look(ref SetPrioritiesForSlaves, "SetPrioritiesForSlaves", true, true);
-            Scribe_Values.Look(ref SetPrioritiesForPrisoners, "SetPrioritiesForPrisoners", true, true);
             Scribe_Values.Look(ref SetPrioritiesForRjwWorkers, "SetPrioritiesForRjwWorkers", false, false);
             Scribe_Values.Look(ref SetBadges, "SetBadges", false, false);
             Scribe_Values.Look(ref SetPawnTitles, "SetPawnTitles", true, true);
@@ -91,7 +67,6 @@ namespace The1nk.WorkGroups {
             Scribe_Collections.Look(ref WorkGroups, "WorkGroups", LookMode.Deep);
             Scribe_Values.Look(ref VerboseLogging, "VerboseLogging", false, true);
             Scribe_Values.Look(ref UseLearningRates, "UseLearningRates", false, true);
-
         }
 
         private string GetSaveDir() {
@@ -126,7 +101,7 @@ namespace The1nk.WorkGroups {
             lines.Add($"{asmV.Major}.{asmV.Minor}.{asmV.Revision}");
             lines.Add(Enabled.ToString());
             lines.Add(SetPrioritiesForSlaves.ToString());
-            lines.Add(SetPrioritiesForPrisoners.ToString());
+            lines.Add("intentionally left blank lol");
             lines.Add(SetPrioritiesForRjwWorkers.ToString());
             lines.Add(SetPawnTitles.ToString());
             lines.Add(MaxPriority.ToString());
@@ -214,7 +189,6 @@ namespace The1nk.WorkGroups {
                 case "1.1.0":
                     Enabled = bool.Parse(lines[1]);
                     SetPrioritiesForSlaves = bool.Parse(lines[2]);
-                    SetPrioritiesForPrisoners = bool.Parse(lines[3]);
                     SetPrioritiesForRjwWorkers = bool.Parse(lines[4]);
                     SetPawnTitles = bool.Parse(lines[5]);
                     MaxPriority = int.Parse(lines[6]);
@@ -234,7 +208,6 @@ namespace The1nk.WorkGroups {
                 case "1.2.0":
                     Enabled = bool.Parse(lines[1]);
                     SetPrioritiesForSlaves = bool.Parse(lines[2]);
-                    SetPrioritiesForPrisoners = bool.Parse(lines[3]);
                     SetPrioritiesForRjwWorkers = bool.Parse(lines[4]);
                     SetPawnTitles = bool.Parse(lines[5]);
                     MaxPriority = int.Parse(lines[6]);
@@ -254,7 +227,6 @@ namespace The1nk.WorkGroups {
                 case "1.3.0":
                     Enabled = bool.Parse(lines[1]);
                     SetPrioritiesForSlaves = bool.Parse(lines[2]);
-                    SetPrioritiesForPrisoners = bool.Parse(lines[3]);
                     SetPrioritiesForRjwWorkers = bool.Parse(lines[4]);
                     SetPawnTitles = bool.Parse(lines[5]);
                     MaxPriority = int.Parse(lines[6]);

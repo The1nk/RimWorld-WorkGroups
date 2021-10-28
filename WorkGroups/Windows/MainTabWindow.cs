@@ -33,10 +33,7 @@ namespace The1nk.WorkGroups.Windows
             Widgets.CheckboxLabeled(cbLocation, "cbEnabled".Translate(), ref _settings.Enabled);
 
             cbLocation.y += textHeight + verticalPadding;
-            Widgets.CheckboxLabeled(cbLocation, "cbSlavePriorities".Translate(), ref _settings.SetPrioritiesForSlaves, !_settings.SsInstalled);
-
-            cbLocation.y += textHeight + verticalPadding;
-            Widgets.CheckboxLabeled(cbLocation, "cbPrisonerPriorities".Translate(), ref _settings.SetPrioritiesForPrisoners, !_settings.PlInstalled);
+            Widgets.CheckboxLabeled(cbLocation, "cbSlavePriorities".Translate(), ref _settings.SetPrioritiesForSlaves);
 
             if (_settings.RjwInstalled) {
                 cbLocation.y += textHeight + verticalPadding;
@@ -217,12 +214,9 @@ namespace The1nk.WorkGroups.Windows
             
             Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.ColonistsAllowed, newLoc.height);
             newLoc.x += 70;
-            
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.SlavesAllowed, newLoc.height, !_settings.SsInstalled);
+
+            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.SlavesAllowed, newLoc.height);
             newLoc.x += 50;
-            
-            Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.PrisonersAllowed, newLoc.height, !_settings.PlInstalled);
-            newLoc.x += 70;
             
             if (_settings.RjwInstalled) {
                 Widgets.Checkbox(new Vector2(newLoc.x, newLoc.y), ref @group.RjwWorkersAllowed, newLoc.height, !_settings.RjwInstalled);
@@ -296,9 +290,6 @@ namespace The1nk.WorkGroups.Windows
             
             Widgets.Label(newLoc, "gpSlaves".Translate());
             newLoc.x += 50;
-            
-            Widgets.Label(newLoc, "gpPrisoners".Translate());
-            newLoc.x += 70;
             
             if (_settings.RjwInstalled) {
                 Widgets.Label(newLoc, "gpWhores".Translate());

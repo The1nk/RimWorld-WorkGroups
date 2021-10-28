@@ -2,8 +2,7 @@
 <LanguageData>
   <!-- Global Settings -->
   <cbEnabled>启用</cbEnabled>
-  <cbSlavePriorities>奴隶可成为小队成员? (需求Simple Slavery)</cbSlavePriorities>
-  <cbPrisonerPriorities>囚犯可成为小队成员? (需求Prison Labor)</cbPrisonerPriorities>
+  <cbSlavePriorities>奴隶可成为小队成员?</cbSlavePriorities>
   <cbRjwPriorities>妓术工作者可成为小队成员? (需求RimJobWorld)</cbRjwPriorities>
   <cbSetPawnTitles>给小人贴上小队标签名字? (配合"显示标签"功能很适合Guards For Me)</cbSetPawnTitles>
   <cbSetPawnBadges>Set Pawn Badges? (Requires Pawn Badges)</cbSetPawnBadges>

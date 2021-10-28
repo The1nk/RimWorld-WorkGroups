@@ -2,8 +2,7 @@
 <LanguageData>
   <!-- Global Settings -->
   <cbEnabled>Enabled</cbEnabled>
-  <cbSlavePriorities>Set Priorities for Slaves? (Requires Simple Slavery)</cbSlavePriorities>
-  <cbPrisonerPriorities>Set Priorities for Prisoners? (Requires Prison Labor)</cbPrisonerPriorities>
+  <cbSlavePriorities>Set Priorities for Slaves?</cbSlavePriorities>
   <cbRjwPriorities>Set Priorities for Whores? (Requires RimJobWorld)</cbRjwPriorities>
   <cbSetPawnTitles>Set Pawn Titles? (Useful with 'Show Titles' feature of Guards For Me)</cbSetPawnTitles>
   <cbSetPawnBadges>Set Pawn Badges? (Requires Pawn Badges)</cbSetPawnBadges>

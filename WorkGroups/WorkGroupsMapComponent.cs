@@ -73,8 +73,6 @@ namespace The1nk.WorkGroups {
             LogHelper.Info($"Firing at {lastUpdateTick}. Next at {nextUpdateTick}.");
 
             var pawns = FetchColonists();
-            if (Settings.PlInstalled && Settings.SetPrioritiesForPrisoners)
-                (pawns as List<PawnWithWorkgroups>).AddRange(FetchPrisoners());
             ClearWorkGroups(ref pawns);
             while (true) {
                 if (!UpdatePriorities(ref pawns))
@@ -91,22 +89,12 @@ namespace The1nk.WorkGroups {
             if (Settings.WorkGroups == null)
                 Settings.WorkGroups = new List<WorkGroup>();
 
-            SlaveHediff = DefDatabase<HediffDef>.GetNamedSilentFail("Enslaved");
-            LogHelper.Warning("SS Type found? " + (SlaveHediff != null));
-            Settings.SsInstalled = SlaveHediff != null;
-            
             var rjwType = GenTypes.GetTypeInAnyAssembly("rjw.xxx", "rjw");
             LogHelper.Warning("RJW Type found? " + (rjwType != null));
             if (rjwType != null)
                 RjwMethod = rjwType.GetMethod("is_whore");
 
             Settings.RjwInstalled = RjwMethod != null;
-
-            var plType = GenTypes.GetTypeInAnyAssembly("PrisonLabor.Core.PrisonLaborUtility", "PrisonLabor.Core");
-            LogHelper.Warning("Prison Labor Type found? " + (plType != null));
-            if (plType != null)
-                PlMethod = plType.GetMethod("LaborEnabled");
-            Settings.PlInstalled = PlMethod != null;
 
             var badgeDefType = GenTypes.GetTypeInAnyAssembly("RR_PawnBadge.BadgeDef", "RR_PawnBadge");
             LogHelper.Warning($"Pawn Badge found ? {badgeDefType != null}");
@@ -416,8 +404,7 @@ namespace The1nk.WorkGroups {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p =>
                             !p.IsColonist || // Not a colonist .. or 
-                            (p.IsColonist && Settings.SsInstalled && p.IsSlave) || // A colonist, but is also a slave
-                            (p.IsColonist && Settings.PlInstalled && p.IsPrisoner)); // A colonist, but also a prisoner
+                            (p.IsColonist && p.IsSlave)); // A colonist, but is also a slave
                         var after = filteredPawns.Count();
 
                         if (before != after)
@@ -425,8 +412,7 @@ namespace The1nk.WorkGroups {
                                 $"Filtered out {before - after} colonists (not slave colonists or prisoner colonists) due to WorkGroup setting disabled");
                     }
 
-                    if (!Settings.SsInstalled ||
-                        (Settings.SsInstalled && !wg.SlavesAllowed)) {
+                    if (!wg.SlavesAllowed) {
                         var before = filteredPawns.Count();
                         filteredPawns = filteredPawns.Where(p => !p.IsSlave);
                         var after = filteredPawns.Count();
@@ -444,17 +430,6 @@ namespace The1nk.WorkGroups {
                         if (before != after)
                             LogHelper.Verbose(
                                 $"Filtered out {before - after} RJW Workers due to WorkGroup setting disabled");
-                    }
-
-                    if (!Settings.PlInstalled ||
-                        (Settings.PlInstalled && !wg.PrisonersAllowed)) {
-                        var before = filteredPawns.Count();
-                        filteredPawns = filteredPawns.Where(p => !p.IsPrisoner);
-                        var after = filteredPawns.Count();
-
-                        if (before != after)
-                            LogHelper.Verbose(
-                                $"Filtered out {before - after} Prisoners due to WorkGroup setting disabled");
                     }
 
                     filteredPawns = filteredPawns.Where(p =>
@@ -725,7 +700,7 @@ namespace The1nk.WorkGroups {
 
             ret.AddRange(map.mapPawns.FreeColonists.Select(p => new PawnWithWorkgroups(p)));
 
-            if (Settings.SsInstalled && !Settings.SetPrioritiesForSlaves) {
+            if (!Settings.SetPrioritiesForSlaves) {
                 var before = ret.Count();
                 ret.RemoveAll(p => p.IsSlave);
                 var after = ret.Count();
@@ -744,38 +719,6 @@ namespace The1nk.WorkGroups {
             }
 
             LogHelper.Verbose("-FetchPawns()");
-            return ret;
-        }
-
-        private IEnumerable<PawnWithWorkgroups> FetchPrisoners() {
-            LogHelper.Verbose("+FetchPrisoners()");
-            var ret = new List<PawnWithWorkgroups>();
-
-            ret.AddRange(map.mapPawns.PrisonersOfColony.Select(p => new PawnWithWorkgroups(p)));
-
-            if (Settings.RjwInstalled && !Settings.SetPrioritiesForRjwWorkers) {
-                var before = ret.Count();
-                ret.RemoveAll(p => p.IsRjwWorker);
-                var after = ret.Count();
-
-                if (before != after)
-                    LogHelper.Verbose($"Filtered out {before - after} (Prisoner) RJW Workers due to global setting disabled");
-            }
-
-            if (!Settings.PlInstalled) {
-                var before = ret.Count();
-                ret.RemoveAll(p => p.IsPrisoner);
-                var after = ret.Count();
-
-                if (before != after)
-                    LogHelper.Verbose($"Filtered out {before - after} Prisoners due to no Prison Labor");
-            } else {
-                var removed = ret.RemoveAll(p => !p.IsWorkingPrisoner);
-                if (removed > 0)
-                    LogHelper.Verbose($"Filtered out {removed} Prisoners due to not being set to Work");
-            }
-
-            LogHelper.Verbose("-FetchPrisoners()");
             return ret;
         }
     }
